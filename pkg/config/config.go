@@ -7,8 +7,8 @@ import (
 
 // Recever configuration
 type RecvConfig struct {
-	Connector connect.Connector
-	Deser     deser.DeserFunc
+	Connectors []connect.Connector
+	Deser      deser.DeserFunc
 }
 
 // Processor configuration

@@ -30,8 +30,8 @@ func InitRecv(pipeConfig *config.PipelineConfig) (config.RecvConfig, error) {
 	connector := connect.MakeHttpGetConnector("https://status.newrelic.com/api/v2/status.json", nil)
 
 	return config.RecvConfig{
-		Connector: &connector,
-		Deser:     deser.DeserJson,
+		Connectors: []connect.Connector{&connector},
+		Deser:      deser.DeserJson,
 	}, nil
 }
 

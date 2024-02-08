@@ -9,6 +9,7 @@ require (
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/newrelic/infrastructure-agent v0.0.0-20201127092132-00ac7efc0cc6 // indirect
 	github.com/prometheus/prometheus v0.40.3 // indirect
+	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/stretchr/testify v1.8.3 // indirect
 )
 

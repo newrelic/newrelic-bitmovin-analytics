@@ -36,6 +36,7 @@ type HttpConfig struct {
 	Headers map[string]string
 	Builder BuilderFunc
 	Timeout time.Duration
+	Name    string
 }
 
 type HttpConnector struct {
@@ -85,6 +86,14 @@ func (c *HttpConnector) Request() ([]byte, ConnecError) {
 
 func (c *HttpConnector) ConnectorID() string {
 	return "HTTP"
+}
+
+func (c *HttpConnector) ConnectorName() string {
+	return c.Config.Name
+}
+
+func (c *HttpConnector) SetConnectorMetricIdentifier(metric string) {
+	c.Config.Name = metric
 }
 
 func (c *HttpConnector) SetReqBuilder(builder BuilderFunc) {

@@ -22,8 +22,8 @@ func InitRecvSimple(pipeConfig *config.PipelineConfig) (config.RecvConfig, error
 	connector := connect.MakeHttpGetConnector("https://api.ipify.org/?format=json", nil)
 
 	return config.RecvConfig{
-		Connector: &connector,
-		Deser:     deser.DeserJson,
+		Connectors: []connect.Connector{&connector},
+		Deser:      deser.DeserJson,
 	}, nil
 }
 
@@ -31,8 +31,8 @@ func InitRecvWithReqBuilder(pipeConfig *config.PipelineConfig) (config.RecvConfi
 	connector := connect.MakeHttpConnectorWithBuilder(requestBuilder)
 
 	return config.RecvConfig{
-		Connector: &connector,
-		Deser:     deser.DeserJson,
+		Connectors: []connect.Connector{&connector},
+		Deser:      deser.DeserJson,
 	}, nil
 }
 

@@ -2,14 +2,13 @@ package main
 
 import (
 	"context"
-
 	aws_lambda "github.com/aws/aws-lambda-go/lambda"
-
+	log "github.com/sirupsen/logrus"
 	"newrelic/multienv/integration"
 	"newrelic/multienv/pkg/config"
+	"newrelic/multienv/pkg/connect"
 	nri_lambda "newrelic/multienv/pkg/env/lambda"
-
-	log "github.com/sirupsen/logrus"
+	"sync"
 )
 
 var pipeConf config.PipelineConfig
@@ -25,29 +24,37 @@ func init() {
 // https://docs.aws.amazon.com/lambda/latest/dg/golang-context.html
 
 func HandleRequest(ctx context.Context, event any) (map[string]any, error) {
+
 	if initErr != nil {
 		log.Error("Error initializing = ", initErr)
 		return nil, initErr
 	}
 
+	wg := &sync.WaitGroup{}
+
 	log.Print("Event received: ", event)
 
-	data, reqErr := initConf.Connector.Request()
-	if reqErr.Err != nil {
-		log.Error("Http Get error = ", reqErr.Err.Error())
-		return nil, reqErr.Err
-	}
-
-	log.Print("Data received: ", data)
-
 	var deserBuffer map[string]any
-	desErr := initConf.Deser(data, &deserBuffer)
-	if desErr != nil {
-		log.Error("Error deserializing data = ", desErr)
-		return nil, desErr
-	}
 
-	log.Print("Data deserialized: ", deserBuffer)
+	for _, connector := range initConf.Connectors {
+		wg.Add(1)
+
+		go func(connector connect.Connector) {
+			defer wg.Done()
+			data, reqErr := connector.Request()
+			if reqErr.Err != nil {
+				log.Error("Http Get error = ", reqErr.Err.Error())
+			}
+
+			log.Print("Data received: ", data)
+
+			desErr := initConf.Deser(data, &deserBuffer)
+			if desErr != nil {
+				log.Error("Error deserializing data = ", desErr)
+			}
+		}(connector)
+	}
+	wg.Wait()
 
 	return deserBuffer, nil
 }

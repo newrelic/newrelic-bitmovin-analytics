@@ -1,4 +1,22 @@
-# Multi Environment NRI Framework
+# nri-bitmovin-analytics
+
+This integration user Bitmovin Analytics API to pull in the below metrics and send it to  New Relic.
+
+Supported Metrics:
+1. max_concurrent_viewers
+2. avg_rebuffer_percentage
+3. cnt_play_attempts
+4. cnt_video_start_failures
+5. avg_video_startup_time_ms
+6. avg_video_bitrate_mbps
+
+#### Bitmovin Credentials
+
+This integration requires below credentials to be set in the config yaml.
+
+- `bitmovin_api_key`: String. Bitmovin API Key
+- `bitmovin_license_key`: String. Bitmovin License Key.
+- `bitmovin_tenant_org`: String. Bitmovin Tenant Org.
 
 ## Standalone
 

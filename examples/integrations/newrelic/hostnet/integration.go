@@ -75,8 +75,8 @@ func InitRecv(pipeConfig *config.PipelineConfig) (config.RecvConfig, error) {
 	connector.SetTimeout(10 * time.Second)
 
 	return config.RecvConfig{
-		Connector: &connector,
-		Deser:     deser.DeserJson,
+		Connectors: []connect.Connector{&connector},
+		Deser:      deser.DeserJson,
 	}, nil
 }
 

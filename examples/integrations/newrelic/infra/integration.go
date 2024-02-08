@@ -28,6 +28,10 @@ func (c *dummyConnector) ConnectorID() string {
 	return "dummy"
 }
 
+func (c *dummyConnector) ConnectorName() string {
+	return "random"
+}
+
 func InitRecv(pipeConfig *config.PipelineConfig) (config.RecvConfig, error) {
 	recv_interval = int(pipeConfig.Interval)
 	if recv_interval == 0 {
@@ -46,8 +50,8 @@ func InitRecv(pipeConfig *config.PipelineConfig) (config.RecvConfig, error) {
 	pipeConfig.Custom["entity_display"] = "My Integration Demo"
 
 	return config.RecvConfig{
-		Connector: &dummyConnector{},
-		Deser:     deser.DeserJson,
+		Connectors: []connect.Connector{&dummyConnector{}},
+		Deser:      deser.DeserJson,
 	}, nil
 }
 
