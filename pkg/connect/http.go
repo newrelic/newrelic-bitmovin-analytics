@@ -92,7 +92,7 @@ func (c *HttpConnector) ConnectorName() string {
 	return c.Config.Name
 }
 
-func (c *HttpConnector) SetConnectorMetricIdentifier(metric string) {
+func (c *HttpConnector) SetConnectorName(metric string) {
 	c.Config.Name = metric
 }
 

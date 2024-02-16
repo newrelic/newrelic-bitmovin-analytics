@@ -22,7 +22,7 @@ func InitReceiver(config RecvWorkerConfig) {
 	recvWorkerConfigHoldr.SetConfig(config)
 	if !recvWorkerConfigHoldr.SetIsRunning() {
 		log.Println("Starting receiver worker...")
-		receiverWorker()
+		go receiverWorker()
 	} else {
 		log.Println("Receiver worker already running, config updated.")
 	}
