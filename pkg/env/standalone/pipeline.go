@@ -1,12 +1,11 @@
 package standalone
 
 import (
+	log "github.com/sirupsen/logrus"
 	"newrelic/multienv/integration"
 	"newrelic/multienv/pkg/config"
 	"newrelic/multienv/pkg/export"
 	"newrelic/multienv/pkg/model"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // Init data pipeline.
@@ -54,7 +53,7 @@ func InitPipeline(pipeConf config.PipelineConfig, recvConfig config.RecvConfig, 
 	})
 	InitReceiver(RecvWorkerConfig{
 		IntervalSec:  pipeConf.Interval,
-		Connector:    recvConfig.Connector,
+		Connectors:   recvConfig.Connectors,
 		Deserializer: recvConfig.Deser,
 		OutChannel:   recvToProcCh,
 	})

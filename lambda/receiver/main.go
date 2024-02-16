@@ -2,14 +2,13 @@ package main
 
 import (
 	"context"
-
-	aws_lambda "github.com/aws/aws-lambda-go/lambda"
-
+	awslambda "github.com/aws/aws-lambda-go/lambda"
+	log "github.com/sirupsen/logrus"
 	"newrelic/multienv/integration"
 	"newrelic/multienv/pkg/config"
-	nri_lambda "newrelic/multienv/pkg/env/lambda"
-
-	log "github.com/sirupsen/logrus"
+	"newrelic/multienv/pkg/connect"
+	nrilambda "newrelic/multienv/pkg/env/lambda"
+	"sync"
 )
 
 var pipeConf config.PipelineConfig
@@ -17,41 +16,50 @@ var initConf config.RecvConfig
 var initErr error
 
 func init() {
-	pipeConf = nri_lambda.LoadConfig()
+	pipeConf = nrilambda.LoadConfig()
 	initConf, initErr = integration.InitRecv(&pipeConf)
 }
 
 // TODO: maybe we can get the scheduler rule from the context
 // https://docs.aws.amazon.com/lambda/latest/dg/golang-context.html
 
-func HandleRequest(ctx context.Context, event any) (map[string]any, error) {
+func HandleRequest(ctx context.Context, event any) ([]map[string]any, error) {
+
 	if initErr != nil {
 		log.Error("Error initializing = ", initErr)
 		return nil, initErr
 	}
 
-	log.Print("Event received: ", event)
+	wg := &sync.WaitGroup{}
+	var deserBuffers []map[string]any
 
-	data, reqErr := initConf.Connector.Request()
-	if reqErr.Err != nil {
-		log.Error("Http Get error = ", reqErr.Err.Error())
-		return nil, reqErr.Err
+	for _, connector := range initConf.Connectors {
+		wg.Add(1)
+
+		go func(connector connect.Connector) {
+			defer wg.Done()
+
+			var deserBuffer map[string]any
+
+			data, reqErr := connector.Request()
+			if reqErr.Err != nil {
+				log.Error("Http Get error = ", reqErr.Err.Error())
+			}
+
+			desErr := initConf.Deser(data, &deserBuffer)
+			if desErr != nil {
+				log.Error("Error deserializing data = ", desErr)
+			}
+
+			log.Print("Data received: ", deserBuffer)
+			deserBuffers = append(deserBuffers, deserBuffer)
+		}(connector)
 	}
+	wg.Wait()
 
-	log.Print("Data received: ", data)
-
-	var deserBuffer map[string]any
-	desErr := initConf.Deser(data, &deserBuffer)
-	if desErr != nil {
-		log.Error("Error deserializing data = ", desErr)
-		return nil, desErr
-	}
-
-	log.Print("Data deserialized: ", deserBuffer)
-
-	return deserBuffer, nil
+	return deserBuffers, nil
 }
 
 func main() {
-	aws_lambda.Start(HandleRequest)
+	awslambda.Start(HandleRequest)
 }

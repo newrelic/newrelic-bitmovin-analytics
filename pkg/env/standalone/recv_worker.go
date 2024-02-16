@@ -1,17 +1,17 @@
 package standalone
 
 import (
-	"time"
-
 	"newrelic/multienv/pkg/connect"
 	"newrelic/multienv/pkg/deser"
+	"sync"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
 
 type RecvWorkerConfig struct {
 	IntervalSec  uint
-	Connector    connect.Connector
+	Connectors   []connect.Connector
 	Deserializer deser.DeserFunc
 	OutChannel   chan<- map[string]any
 }
@@ -31,23 +31,35 @@ func InitReceiver(config RecvWorkerConfig) {
 func receiverWorker() {
 	for {
 		config := recvWorkerConfigHoldr.Config()
-
 		pre := time.Now().Unix()
 
-		data, err := config.Connector.Request()
-		if err.Err != nil {
-			log.Error("Http Get error = ", err.Err.Error())
-			delayBeforeNextReq(pre, &config)
-			continue
+		wg := &sync.WaitGroup{}
+		wg.Add(len(config.Connectors))
+
+		for _, connector := range config.Connectors {
+			go func(connector connect.Connector) {
+				defer wg.Done()
+
+				data, err := connector.Request()
+				if err.Err != nil {
+					log.Error("Http Get error = ", err.Err.Error())
+					delayBeforeNextReq(pre, &config)
+					return
+				}
+
+				log.Println("Data received: ", string(data))
+
+				var deserBuffer map[string]any
+				desErr := config.Deserializer(data, &deserBuffer)
+				deserBuffer["metric"] = connector.ConnectorName()
+				if desErr == nil {
+					config.OutChannel <- deserBuffer
+				}
+			}(connector)
 		}
 
-		log.Println("Data received: ", string(data))
-
-		var deserBuffer map[string]any
-		desErr := config.Deserializer(data, &deserBuffer)
-		if desErr == nil {
-			config.OutChannel <- deserBuffer
-		}
+		wg.Wait()
+		log.Println("All Requests Completed")
 
 		// Delay before the next request
 		delayBeforeNextReq(pre, &config)

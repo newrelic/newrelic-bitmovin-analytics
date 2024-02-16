@@ -1,25 +1,22 @@
 package integration
 
 import (
-	"newrelic/multienv/examples/integrations/random"
+	"newrelic/multienv/integration/bitmovin"
 	"newrelic/multienv/pkg/config"
 	"newrelic/multienv/pkg/model"
 )
 
-// Integration Receiver Initializer
+// InitRecv Integration Receiver Initializer
 func InitRecv(pipeConfig *config.PipelineConfig) (config.RecvConfig, error) {
-	// CALL YOUR RECEIVER INITIALIZER HERE
-	return random.InitRecv(pipeConfig)
+	return bitmovin.InitRecv(pipeConfig)
 }
 
-// Integration Processor Initializer
+// InitProc Integration Processor Initializer
 func InitProc(pipeConfig *config.PipelineConfig) (config.ProcConfig, error) {
-	// CALL YOUR PROCESSOR INITIALIZER HERE
-	return random.InitProc(pipeConfig)
+	return bitmovin.InitProc(pipeConfig)
 }
 
-// Integration Processor
+// Proc Integration Processor
 func Proc(data any) []model.MeltModel {
-	// CALL YOUR PROCESSOR HERE
-	return random.Proc(data)
+	return bitmovin.Proc(data)
 }
