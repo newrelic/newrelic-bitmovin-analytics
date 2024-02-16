@@ -102,7 +102,6 @@ func Proc(data any) []model.MeltModel {
 
 	out := make([]model.MeltModel, 0)
 
-	log.Println("DATA ===== ", data)
 	if apiResponse, ok := data.(Response); ok {
 		for i := 0; i < apiResponse.Data.Result.RowCount; i++ {
 			metricValue := model.Numeric{}
