@@ -31,7 +31,7 @@ $ go build
 
 The standalone environment requires a YAML file for pipeline configuration. The required keys are:
 
-- `interval`: Integer. Time in seconds between requests.
+- `interval`: Integer. Time in seconds between requests(should be same as the schedule / cron).
 - `exporter`: `nrmetrics`.
 - `bitmovin_api_key`: String. Bitmovin API Key
 - `bitmovin_license_key`: String. Bitmovin License Key.
@@ -93,7 +93,7 @@ A Lambda pipeline requieres some configuration keys to be set as **environment v
 
 Environment Variables to be set on the Receiver function:
 
-- `interval`: Integer. Time in seconds between requests.
+- `interval`: Integer. Time in seconds between requests(should be same as the schedule / cron).
 - `exporter`: `nrmetrics`.
 - `bitmovin_api_key`: String. Bitmovin API Key
 - `bitmovin_license_key`: String. Bitmovin License Key.
