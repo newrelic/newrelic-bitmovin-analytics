@@ -1,6 +1,6 @@
 # nri-bitmovin-analytics
 
-This integration user Bitmovin Analytics API to pull in the below metrics and send it to  New Relic.
+This integration uses Bitmovin Analytics API to pull in the below metrics and send it to  New Relic.
 
 Supported Metrics:
 1. max_concurrent_viewers
@@ -10,13 +10,6 @@ Supported Metrics:
 5. avg_video_startup_time_ms
 6. avg_video_bitrate_mbps
 
-#### Bitmovin Credentials
-
-This integration requires below credentials to be set in the config yaml.
-
-- `bitmovin_api_key`: String. Bitmovin API Key
-- `bitmovin_license_key`: String. Bitmovin License Key.
-- `bitmovin_tenant_org`: String. Bitmovin Tenant Org.
 
 ## Standalone
 
@@ -36,40 +29,19 @@ $ go build
 
 ### Configuring the Pipeline
 
-The standalone environment requieres a YAML file for pipeline configuration. The requiered keys are:
+The standalone environment requires a YAML file for pipeline configuration. The required keys are:
 
 - `interval`: Integer. Time in seconds between requests.
-- `exporter`: String. Exporter type, possible values are: `nrapi`, `nrmetrics`, `nrevents`, `nrlogs`, `nrtraces`, `otel` and `prom`.
-
-Check `config/example_config.yaml` for a configuration example.
-
-Each one of the exporters also require specific configuration.
-
-#### New Relic APIs exporter
-
-For exporter types `nrapi`, `nrmetrics`, `nrevents`, `nrlogs`, and `nrtraces`, the following keys are used:
-
-- `nr_account_id`: String. Account ID. Only requiered for `nrevents` and `nrapi` exporters.
+- `exporter`: `nrmetrics`.
+- `bitmovin_api_key`: String. Bitmovin API Key
+- `bitmovin_license_key`: String. Bitmovin License Key.
+- `bitmovin_tenant_org`: String. Bitmovin Tenant Org.
+- `nr_account_id`: String.
 - `nr_api_key`: String. Api key for writing.
 - `nr_endpoint`: String. New Relic endpoint region. Either `US` or `EU`. Optional, default value is `US`.
 
-#### OpenTelemetry exporter
+Check `config/example_config.yaml` for a configuration example.
 
-For exporter type `otel` the following keys are used:
-
-- `otel_endpoint`: String. Domain and (optionally) port only, no scheme or path. Example: `my.otel.example.com:4318`
-- `otel_scheme`: String. Either `http` or `https`. If not specified, default value is `https`.
-- `otel_headers`: Map. List of key-value pairs sent as HTTP request headers. Optional.
-- `otel_metric_endpoint`: String. Full URL of an endpoint to send metrics. If specified, `otel_endpoint` and `otel_scheme` will be ignored.
-- `otel_logs_endpoint`: String. Full URL of an endpoint to send logs. If specified, `otel_endpoint` and `otel_scheme` will be ignored.
-
-#### Prometheus exporter
-
-For exporter type `prom` the following keys are used:
-
-- `prom_endpoint`: String. Prometheus remote write URL.
-- `prom_credentials`: String. Authorization credentials. Optional.
-- `prom_headers`: Map. List of key-value pairs sent as HTTP request headers. Optional.
 
 ### Running the Pipeline
 
@@ -117,37 +89,21 @@ Where *RECEIVER*, *PROCESSOR*, and *EXPORTER*, are the AWS Lambda functions you 
 
 ### Configuring the Pipeline
 
-A Lambda pipeline requieres some configuration keys to be set as **environment variables**. To set up environment variables, go to AWS console, Lambda->Functions, click your function, Configuration->Environment variables. Currently, only the Exporter lambda requires some variables to be set:
+A Lambda pipeline requieres some configuration keys to be set as **environment variables**. To set up environment variables, go to AWS console, Lambda->Functions, click your function, Configuration->Environment variables:
 
-- `exporter`: String. Exporter type, possible values are: `nrapi`, `nrmetrics`, `nrevents`, `nrlogs`, `nrtraces`, `otel` and `prom`.
+Environment Variables to be set on the Receiver function:
 
-Each one of the exporters also require specific configuration.
+- `interval`: Integer. Time in seconds between requests.
+- `exporter`: `nrmetrics`.
+- `bitmovin_api_key`: String. Bitmovin API Key
+- `bitmovin_license_key`: String. Bitmovin License Key.
+- `bitmovin_tenant_org`: String. Bitmovin Tenant Org.
 
-#### New Relic APIs exporter
-
-For exporter types `nrapi`, `nrmetrics`, `nrevents`, `nrlogs`, and `nrtraces`, the following keys are used:
+Environment Variables to be set on the Exporter function:
 
 - `nr_account_id`: String. Account ID. Only requiered for `nrevents` and `nrapi` exporters.
 - `nr_api_key`: String. Api key for writing.
 - `nr_endpoint`: String. New Relic endpoint region. Either `US` or `EU`. Optional, default value is `US`.
-
-#### OpenTelemetry exporter
-
-For exporter type `otel` the following keys are used:
-
-- `otel_endpoint`: String. Domain and (optionally) port only, no scheme or path. Example: `my.otel.example.com:4318`
-- `otel_scheme`: String. Either `http` or `https`. If not specified, default value is `https`.
-- `otel_headers`: Map. List of key-value pairs sent as HTTP request headers. Optional.
-- `otel_metric_endpoint`: String. Full URL of an endpoint to send metrics. If specified, `otel_endpoint` and `otel_scheme` will be ignored.
-- `otel_logs_endpoint`: String. Full URL of an endpoint to send logs. If specified, `otel_endpoint` and `otel_scheme` will be ignored.
-
-#### Prometheus exporter
-
-For exporter type `prom` the following keys are used:
-
-- `prom_endpoint`: String. Prometheus remote write URL.
-- `prom_credentials`: String. Optional authorization credentials.
-- `prom_headers`: Map. List of key-value pairs sent as HTTP request headers. Optional.
 
 ### Running the Pipeline
 
@@ -164,65 +120,3 @@ $ aws lambda invoke-async --function-name RECEIVER --invoke-args INPUT.json
 Where *RECEIVER* is the **Receiver** lambda name and *INPUT.json* is a file containing any JSON (the input event will be ignored by the receiver).
 
 This will simulate a timer event and trigger the pipeline.
-
-## Infra
-
-The Infra environment runs the data pipeline as a New Relic Infrastructure Agent plugin. It's located in the `cmd/infra` folder.
-
-### Prerequisites
-
-- [New Relic Infrastructure Agent](https://docs.newrelic.com/docs/infrastructure/install-infrastructure-agent/get-started/install-infrastructure-agent/).
-- Go 1.20 or later.
-
-### Build & Desploy
-
-Open a terminal, CD to `cmd/infra`, and run:
-
-```
-$ go build
-```
-
-It will generate a binary named `infra` in the same folder. Move it to the folder where you have all your NR Infra integrations, for Linux it is `/var/db/newrelic-infra/custom-integrations/`, and rename it as you wish, usually `nri-SOMETHING`.
-
-### Configuring the Pipeline
-
-As any other NR Infra integration, it's configured through a YAML file in `/etc/newrelic-infra/integrations.d/` (Linux), that should look like:
-
-```
-integrations:
-  - name: nri-myintegration    
-    config:
-      key_one: value_one
-      key_two: value_two
-    interval: 15s
-```
-
-Whatever you put under `config` will be passed to the integration. The following keys are used:
-
-- `name`: Integration name. Default value `InfraIntegration`.
-- `version`: Integration version. Default value `0.1.0`.
-- `entity_name`: Entity name. Must be unique for the NR account, otherwise it will cause conflicts. Default value `EntityName`.
-- `entity_type`: Entity type. Default value `EntityType`.
-- `entity_display`: Entity display name. Default value `EntityDisplay`.
-
-Unlike Standalone and Lambda environments, there is no need to set the exporter, because it will be always `nrinfra`.
-
-For further information on NR Infra configuration, check out the following links:
-
-- https://docs.newrelic.com/docs/infrastructure/install-infrastructure-agent/configuration/configure-infrastructure-agent/
-- https://docs.newrelic.com/docs/infrastructure/install-infrastructure-agent/configuration/infrastructure-agent-configuration-settings/
-- https://github.com/newrelic/infrastructure-agent/blob/master/assets/examples/infrastructure/newrelic-infra-template.yml.example
-
-### Running the Pipeline
-
-It will be automatically executed by the New Relic Infrastructure Agent based on the time interval configuration.
-
-### Testing
-
-Instead of running it automatically, you can run it manually for testing and debugging:
-
-```
-$ go build && CONFIG_PATH=/path/to/config.yaml ./infra
-```
-
-Where `/path/to/config.yaml` is a YAML file containing the contents of your `config` key.
