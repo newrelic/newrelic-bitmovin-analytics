@@ -2,16 +2,13 @@ package main
 
 import (
 	"context"
-	"encoding/json"
-
-	aws_lambda "github.com/aws/aws-lambda-go/lambda"
+	awslambda "github.com/aws/aws-lambda-go/lambda"
+	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
-
 	"newrelic/multienv/integration"
 	"newrelic/multienv/pkg/config"
-	nri_lambda "newrelic/multienv/pkg/env/lambda"
-
-	"github.com/mitchellh/mapstructure"
+	nrilambda "newrelic/multienv/pkg/env/lambda"
+	model "newrelic/multienv/pkg/model"
 )
 
 var pipeConf config.PipelineConfig
@@ -19,7 +16,7 @@ var initConf config.ProcConfig
 var initErr error
 
 func init() {
-	pipeConf = nri_lambda.LoadConfig()
+	pipeConf = nrilambda.LoadConfig()
 	initConf, initErr = integration.InitProc(&pipeConf)
 }
 
@@ -29,27 +26,30 @@ func HandleRequest(ctx context.Context, event map[string]any) (any, error) {
 		return nil, initErr
 	}
 
-	log.Print("Processor event received = ", event)
+	processorModel := initConf.Model
+	responsePayload, ok := event["responsePayload"].([]any)
 
-	model := initConf.Model
-	responsePayload, ok := event["responsePayload"]
+	var dataArray []model.MeltModel
+
 	if ok {
-		err := mapstructure.Decode(responsePayload, &model)
-		if err == nil {
-			data := integration.Proc(model)
-			log.Print("Sending to SQS processed data = ", data)
-			return json.Marshal(data)
-		} else {
-			// We don't return an error because we don't want AWS to retry, just ignore this event.
-			log.Error("Error mapping data = ", err)
+		for _, payload := range responsePayload {
+			err := mapstructure.Decode(payload, &processorModel)
+			if err == nil {
+				data := integration.Proc(processorModel)
+				dataArray = append(dataArray, data...)
+			} else {
+				// We don't return an error because we don't want AWS to retry, just ignore this event.
+				log.Error("Error mapping data = ", err)
+			}
 		}
+
+		return dataArray, nil
 	} else {
 		log.Error("responsePayload not present")
+		return nil, nil
 	}
-
-	return nil, nil
 }
 
 func main() {
-	aws_lambda.Start(HandleRequest)
+	awslambda.Start(HandleRequest)
 }

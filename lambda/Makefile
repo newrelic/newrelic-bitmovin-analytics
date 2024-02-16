@@ -18,16 +18,16 @@ deploy: deploy-recv deploy-proc deploy-expt
 deploy-recv: build-recv update-recv clean-recv
 
 compile-recv:
-	( cd ./receiver && GOOS=linux GOARCH=$(arch) go build -o receiver )
+	( cd ./receiver && GOOS=linux GOARCH=$(arch) go build -o bootstrap )
 
 zip-recv:
-	( cd ./receiver && zip receiver.zip receiver )
+	( cd ./receiver && zip receiver.zip bootstrap )
 
 update-recv:
 	( cd ./receiver && aws lambda update-function-code --no-cli-pager --function-name $(recv) --zip-file fileb://receiver.zip )
 
 clean-bin-recv:
-	( cd ./receiver && rm -f receiver )
+	( cd ./receiver && rm -f bootstrap )
 
 clean-zip-recv:
 	( cd ./receiver && rm -f receiver.zip )
@@ -41,16 +41,16 @@ build-recv: compile-recv zip-recv
 deploy-proc: build-proc update-proc clean-proc
 
 compile-proc:
-	( cd ./processor && GOOS=linux GOARCH=$(arch) go build -o processor )
+	( cd ./processor && GOOS=linux GOARCH=$(arch) go build -o bootstrap )
 
 zip-proc:
-	( cd ./processor && zip processor.zip processor )
+	( cd ./processor && zip processor.zip bootstrap )
 
 update-proc:
 	( cd ./processor && aws lambda update-function-code --no-cli-pager --function-name $(proc) --zip-file fileb://processor.zip )
 
 clean-bin-proc:
-	( cd ./processor && rm -f processor )
+	( cd ./processor && rm -f bootstrap )
 
 clean-zip-proc:
 	( cd ./processor && rm -f processor.zip )
@@ -64,16 +64,16 @@ build-proc: compile-proc zip-proc
 deploy-expt: build-expt update-expt clean-expt
 
 compile-expt:
-	( cd ./exporter && GOOS=linux GOARCH=$(arch) go build -o exporter )
+	( cd ./exporter && GOOS=linux GOARCH=$(arch) go build -o bootstrap )
 
 zip-expt:
-	( cd ./exporter && zip exporter.zip exporter )
+	( cd ./exporter && zip exporter.zip bootstrap )
 
 update-expt:
 	( cd ./exporter && aws lambda update-function-code --no-cli-pager --function-name $(expt) --zip-file fileb://exporter.zip )
 
 clean-bin-expt:
-	( cd ./exporter && rm -f exporter )
+	( cd ./exporter && rm -f bootstrap )
 
 clean-zip-expt:
 	( cd ./exporter && rm -f exporter.zip )

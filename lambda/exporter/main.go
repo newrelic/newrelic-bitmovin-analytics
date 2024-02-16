@@ -2,15 +2,13 @@ package main
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/json"
-
-	aws_events "github.com/aws/aws-lambda-go/events"
-	aws_lambda "github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-lambda-go/events"
+	awslambda "github.com/aws/aws-lambda-go/lambda"
+	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
-
 	"newrelic/multienv/pkg/config"
-	nri_lambda "newrelic/multienv/pkg/env/lambda"
+	nrilambda "newrelic/multienv/pkg/env/lambda"
 	"newrelic/multienv/pkg/export"
 	"newrelic/multienv/pkg/model"
 )
@@ -18,44 +16,80 @@ import (
 var pipeConf config.PipelineConfig
 
 func init() {
-	pipeConf = nri_lambda.LoadConfig()
+	pipeConf = nrilambda.LoadConfig()
 }
 
-func HandleRequest(ctx context.Context, event aws_events.SQSEvent) error {
+func HandleRequest(ctx context.Context, event events.SQSEvent) error {
 
 	samples := make([]model.MeltModel, 0)
+	var meltModel model.MeltModel
 
-	for i, record := range event.Records {
+	for _, record := range event.Records {
 		var obj map[string]any
-		json.Unmarshal([]byte(record.Body), &obj)
-		responsePayload, ok := obj["responsePayload"].(string)
+
+		err := json.Unmarshal([]byte(record.Body), &obj)
+		if err != nil {
+			log.Error("Error unmarshalling = ", err)
+			return err
+		}
+
+		responsePayload, ok := obj["responsePayload"].([]any)
 		if ok {
-			// Decode Base64 and Unmarshal JSON
-			sDec, err := base64.StdEncoding.DecodeString(responsePayload)
-			if err != nil {
-				log.Error("Error decoding = ", err)
-				continue
+			for _, payload := range responsePayload {
+
+				mapErr := mapstructure.Decode(payload, &meltModel)
+				if mapErr != nil {
+					log.Warn("error while decoding", mapErr)
+					return nil
+				}
+
+				switch meltModel.Type {
+				case model.Metric:
+					var metricModel model.MetricModel
+					metricMapError := mapstructure.Decode(meltModel.Data, &metricModel)
+					if metricMapError != nil {
+						log.Warn("error while decoding metric", metricMapError)
+						return nil
+					}
+					meltModel.Data = metricModel
+				case model.Event:
+					var eventModel model.EventModel
+					eventMapError := mapstructure.Decode(meltModel.Data, &eventModel)
+					if eventMapError != nil {
+						log.Warn("error while decoding event", eventMapError)
+						return nil
+					}
+					meltModel.Data = eventModel
+				case model.Log:
+					var logModel model.LogModel
+					logMapError := mapstructure.Decode(meltModel.Data, &logModel)
+					if logMapError != nil {
+						log.Warn("error while decoding Log", logMapError)
+						return nil
+					}
+					meltModel.Data = logModel
+				case model.Trace:
+					var traceModel model.TraceModel
+					traceMapError := mapstructure.Decode(meltModel.Data, &traceModel)
+					if traceMapError != nil {
+						log.Warn("error while decoding Trace", traceMapError)
+						return nil
+					}
+					meltModel.Data = traceModel
+				case model.Custom:
+					// Custom types should be handled explicitly based on requirement
+					log.Println("Model is custom type")
+				}
+				samples = append(samples, meltModel)
 			}
-
-			responsePayload = string(sDec)
-
-			var model []model.MeltModel
-			err = json.Unmarshal([]byte(responsePayload), &model)
-			if err != nil {
-				log.Error("Error mapping MELT model = ", err)
-				continue
-			}
-
-			log.Printf("(%d) SQS decoded response payload = %v", i, model)
-
-			samples = append(samples, model...)
 
 		} else {
-			log.Error("Couldn't get a string from 'responsePayload'")
+			log.Error("Couldn't get 'responsePayload'")
+			return nil
 		}
 	}
 
-	// Export data
+	//Export data
 	exporter := export.SelectExporter(pipeConf.Exporter)
 	err := exporter(pipeConf, samples)
 	if err != nil {
@@ -67,5 +101,5 @@ func HandleRequest(ctx context.Context, event aws_events.SQSEvent) error {
 }
 
 func main() {
-	aws_lambda.Start(HandleRequest)
+	awslambda.Start(HandleRequest)
 }
