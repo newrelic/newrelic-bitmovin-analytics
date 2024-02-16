@@ -6,11 +6,9 @@ import (
 	"newrelic/multienv/pkg/model"
 )
 
-// MAX CONCURRENT VIEWS
-
 // InitRecv Integration Receiver Initializer
 func InitRecv(pipeConfig *config.PipelineConfig) (config.RecvConfig, error) {
-	return bitmovin.InitRecvWithReqBuilder(pipeConfig)
+	return bitmovin.InitRecv(pipeConfig)
 }
 
 // InitProc Integration Processor Initializer
