@@ -5,7 +5,7 @@
 # "buffer", size of channel buffers. Optional, default value 100.
 
 interval: 5
-exporter: nrlogs
+exporter: nrmetrics
 
 # Custom keys here...
 
@@ -13,10 +13,13 @@ exporter: nrlogs
 # buffer: 500
 
 # New Relic API credentials
-# nr_account_id: XXXXX
-# nr_user_key: XXXXX
-# nr_api_key: XXXXX
-# nr_endpoint: US
+nr_account_id: xxxxx
+nr_user_key: xxxxx
+nr_api_key: xxxxx
+nr_endpoint: US
+bitmovin_api_key: xxxxx
+bitmovin_license_key: xxxxx
+bitmovin_tenant_org: xxxxx
 
 # Exporter batching and timing
 # batch_size: 50
