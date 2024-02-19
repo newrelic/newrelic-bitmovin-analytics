@@ -116,13 +116,13 @@ var metricTypes = []Metric{
 		URI:         "/v1/analytics/queries/avg",
 		NRMetric:    "bitmovin.avg_video_startup_time_ms",
 		BMDimension: "VIDEO_STARTUPTIME",
-		Filters:     []map[string]any{{"name": "VIDEO_STARTUPTIME", "operator": "GT", "value": 0}},
+		Filters:     []map[string]any{},
 	},
 	{
 		Name:        "VIDEO BITRATE",
 		URI:         "/v1/analytics/queries/avg",
 		NRMetric:    "bitmovin.avg_video_bitrate_mbps",
 		BMDimension: "VIDEO_BITRATE",
-		Filters:     []map[string]any{{"name": "VIDEO_BITRATE", "operator": "GT", "value": 0}},
+		Filters:     []map[string]any{},
 	},
 }
