@@ -2,7 +2,21 @@
 
 # NRI Bitmovin Analytics Integration
 
-This integration uses Bitmovin Analytics API to pull in the below metrics and send it to  New Relic.
+![GitHub forks](https://img.shields.io/github/forks/newrelic/nri-bitmovin-analytics?style=social)
+![GitHub stars](https://img.shields.io/github/stars/newrelic/nri-bitmovin-analytics?style=social)
+![GitHub watchers](https://img.shields.io/github/watchers/newrelic/nri-bitmovin-analytics?style=social)
+
+![GitHub all releases](https://img.shields.io/github/downloads/newrelic/nri-bitmovin-analytics/total)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/newrelic/nri-bitmovin-analytics)
+![GitHub last commit](https://img.shields.io/github/last-commit/newrelic/nri-bitmovin-analytics)
+![GitHub Release Date](https://img.shields.io/github/release-date/newrelic/nri-bitmovin-analytics)
+
+![GitHub issues](https://img.shields.io/github/issues/newrelic/nri-bitmovin-analytics)
+![GitHub issues closed](https://img.shields.io/github/issues-closed/newrelic/nri-bitmovin-analytics)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/newrelic/nri-bitmovin-analytics)
+![GitHub pull requests closed](https://img.shields.io/github/issues-pr-closed/newrelic/nri-bitmovin-analytics)
+
+This integration uses Bitmovin Analytics API to pull in the below metrics and push them into New Relic.
 
 Supported Metrics:
 1. max_concurrent_viewers
