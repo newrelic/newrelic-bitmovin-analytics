@@ -18,12 +18,6 @@ func createBuilderRequest(metric Metric) (*http.Request, error) {
 	bufferDuration := time.Duration(recv_interval + 60)
 	start := end.Add(-bufferDuration * time.Second)
 
-	seconds := end.Sub(start).Seconds()
-
-	log.Println("TIME DIFF ", seconds)
-	log.Println(start.Format(time.RFC3339Nano))
-	log.Println(end.Format(time.RFC3339Nano))
-
 	requestBody := &RequestBody{
 		Start:      start.Format(time.RFC3339Nano),
 		End:        end.Format(time.RFC3339Nano),
