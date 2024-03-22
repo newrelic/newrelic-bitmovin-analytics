@@ -49,8 +49,6 @@ func createBuilderRequest(metric Metric) (*http.Request, error) {
 		log.Println(err)
 	}
 
-	log.Println(string(jsonValue))
-
 	req, err := http.NewRequest("POST", BaseURL+metric.URI, bytes.NewReader(jsonValue))
 	req.Header = getBitmovinRequestHeaders()
 	if err != nil {
