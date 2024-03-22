@@ -2,11 +2,9 @@ package bitmovin
 
 import (
 	_ "fmt"
-	"time"
 )
 
 var recv_interval = 0
-var bitmovinTimestamps = BitmovinTimestamps{}
 var bitmovinCreds = BitmovinCreds{}
 
 // BitmovinCredentials offers methods for interaction with Bitmovin Analytics API
@@ -16,17 +14,15 @@ type BitmovinCreds struct {
 	TenantOrg  string
 }
 
-type BitmovinTimestamps struct {
-	StartTime time.Time
-	EndTime   time.Time
-}
-
 type Metric struct {
 	Name        string
 	URI         string
 	NRMetric    string
 	BMDimension string
+	Metric      string
 	Filters     []map[string]any
+	OrderBy     []OrderBy
+	Interval    string
 }
 
 type Result struct {
@@ -57,16 +53,14 @@ type Response struct {
 }
 
 type RequestBody struct {
-	Start          string           `json:"start"`
-	End            string           `json:"end"`
-	LicenseKey     string           `json:"licenseKey"`
-	Dimension      string           `json:"dimension"`
-	GroupBy        []string         `json:"groupBy"`
-	IncludeContext bool             `json:"includeContext"`
-	Limit          int              `json:"limit"`
-	Offset         int              `json:"offset"`
-	Interval       string           `json:"interval"`
-	Filters        []map[string]any `json:"filters"`
+	Start      string            `json:"start"`
+	End        string            `json:"end"`
+	LicenseKey string            `json:"licenseKey"`
+	Dimension  *string           `json:"dimension,omitempty"`
+	Metric     *string           `json:"metric,omitempty"`
+	Filters    *[]map[string]any `json:"filters,omitempty"`
+	OrderBy    *[]OrderBy        `json:"orderBy,omitempty"`
+	Interval   *string           `json:"interval,omitempty"`
 }
 
 type Message struct {
@@ -76,53 +70,20 @@ type Message struct {
 	Text string `json:"text"`
 }
 
+type OrderBy struct {
+	Name  string `json:"name"`
+	Order string `json:"order"`
+}
+
 // BaseURL Bitmovin package constant
 const (
 	BaseURL = "https://api.bitmovin.com"
 )
 
-var metricTypes = []Metric{
-	{
-		Name:        "CONCURRENTS",
-		URI:         "/v1/analytics/metrics/max-concurrentviewers",
-		NRMetric:    "bitmovin.cnt_max_concurrent_viewers",
-		BMDimension: "",
-		Filters:     []map[string]any{},
-	},
-	{
-		Name:        "REBUFFER",
-		URI:         "/v1/analytics/queries/avg",
-		NRMetric:    "bitmovin.avg_rebuffer_percentage",
-		BMDimension: "REBUFFER_PERCENTAGE",
-		Filters:     []map[string]any{},
-	},
-	{
-		Name:        "PLAY ATTEMPTS",
-		URI:         "/v1/analytics/queries/count",
-		NRMetric:    "bitmovin.cnt_play_attempts",
-		BMDimension: "PLAY_ATTEMPTS",
-		Filters:     []map[string]any{},
-	},
-	{
-		Name:        "VIDEO START FAILURES",
-		URI:         "/v1/analytics/queries/count",
-		NRMetric:    "bitmovin.cnt_video_start_failures",
-		BMDimension: "VIDEOSTART_FAILED",
-		Filters: []map[string]any{{"name": "VIDEOSTART_FAILED_REASON", "operator": "NE", "value": "PAGE_CLOSED"},
-			{"name": "VIDEOSTART_FAILED", "operator": "EQ", "value": true}},
-	},
-	{
-		Name:        "VIDEO START TIME",
-		URI:         "/v1/analytics/queries/avg",
-		NRMetric:    "bitmovin.avg_video_startup_time_ms",
-		BMDimension: "VIDEO_STARTUPTIME",
-		Filters:     []map[string]any{},
-	},
-	{
-		Name:        "VIDEO BITRATE",
-		URI:         "/v1/analytics/queries/avg",
-		NRMetric:    "bitmovin.avg_video_bitrate_mbps",
-		BMDimension: "VIDEO_BITRATE",
-		Filters:     []map[string]any{},
-	},
+func getBitmovinRequestHeaders() map[string][]string {
+	return map[string][]string{
+		"X-Api-Key":       {bitmovinCreds.APIKey},
+		"Content-Type":    {"application/json"},
+		"Accept":          {"application/json"},
+		"X-Tenant-Org-Id": {bitmovinCreds.TenantOrg}}
 }
