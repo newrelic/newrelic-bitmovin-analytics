@@ -46,7 +46,7 @@ func createBuilderRequest(metric Metric) (*http.Request, error) {
 
 	jsonValue, err := json.Marshal(requestBody)
 	if err != nil {
-		log.Println(err)
+		log.Warn(err)
 	}
 
 	req, err := http.NewRequest("POST", BaseURL+metric.URI, bytes.NewReader(jsonValue))
