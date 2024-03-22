@@ -4,7 +4,7 @@
 # "exporter", string, where to export data. Possible values: "nrinfra", "nrmetrics", "nrevents", "nrlogs", "nrtraces", "otel" and "prom"
 # "buffer", size of channel buffers. Optional, default value 100.
 
-interval: 5
+interval: 60
 exporter: nrmetrics
 
 # Custom keys here...
