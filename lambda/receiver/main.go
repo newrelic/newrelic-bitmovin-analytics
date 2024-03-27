@@ -52,6 +52,7 @@ func HandleRequest(ctx context.Context, event any) ([]map[string]any, error) {
 			}
 
 			log.Print("Data received: ", deserBuffer)
+			deserBuffer["metric"] = connector.ConnectorName()
 			deserBuffers = append(deserBuffers, deserBuffer)
 		}(connector)
 	}
