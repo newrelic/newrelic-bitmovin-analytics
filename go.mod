@@ -1,4 +1,4 @@
-module github.com/newrelic/nri-bitmovin-analytics
+module github.com/newrelic/newrelic-bitmovin-analytics
 
 go 1.20
 

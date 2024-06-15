@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 
+	"github.com/newrelic/newrelic-bitmovin-analytics/internal/bitmovin"
 	"github.com/newrelic/newrelic-labs-sdk/pkg/integration"
 	"github.com/newrelic/newrelic-labs-sdk/pkg/integration/log"
-	"github.com/newrelic/nri-bitmovin-analytics/internal/bitmovin"
 )
 
 var (
