@@ -3,7 +3,7 @@ module github.com/newrelic/newrelic-bitmovin-analytics
 go 1.20
 
 require (
-	github.com/newrelic/newrelic-labs-sdk v0.0.0
+	github.com/newrelic/newrelic-labs-sdk v1.0.0
 	github.com/spf13/viper v1.15.0
 )
 
@@ -51,4 +51,4 @@ require (
 )
 
 // @TODO: remove after development
-replace github.com/newrelic/newrelic-labs-sdk v0.0.0 => ../newrelic-labs-sdk
+//replace github.com/newrelic/newrelic-labs-sdk v0.0.0 => ../newrelic-labs-sdk

@@ -10,9 +10,9 @@ import (
 
 var (
 	/* Args below are populated via ldflags at build time */
-	gIntegrationID      = "com.newrelic.labs.nri-bitmovin-analytics"
-	gIntegrationName    = "New Relic Infrastructure Bitmovin Integration"
-	gIntegrationVersion = "0.1.0"
+	gIntegrationID      = "com.newrelic.labs.newrelic-bitmovin-analytics"
+	gIntegrationName    = "New Relic Bitmovin Analytics Integration"
+	gIntegrationVersion = "2.0.0"
 	gGitCommit          = ""
 	gBuildDate          = ""
 	gBuildInfo			= integration.BuildInfo{
