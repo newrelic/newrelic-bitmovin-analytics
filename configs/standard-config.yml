@@ -1,7 +1,3 @@
-apiKey: XXXXXX
-licenseKey: XXXXXX
-accountId: 0
-region: US
 interval: 60
 runAsService: false
 pipeline:
@@ -10,14 +6,10 @@ pipeline:
   exportWorkers: 3
 log:
   level: warn
-  fileName: trace.log
-
 bitmovinMetricPrefix: bitmovin.
-bitmovinApiKey: xxxxx
-bitmovinLicenseKey: xxxxx
-bitmovinTenantOrg: xxxxx
 queries:
-- type: concurrentviewers
+## Default Queries
+- type: max_concurrentviewers
 - type: average
   metric: REBUFFER_PERCENTAGE
 - type: count

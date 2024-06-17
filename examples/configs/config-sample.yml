@@ -1,0 +1,70 @@
+apiKey: XXXXXX
+licenseKey: XXXXXX
+accountId: 0
+region: US
+interval: 60
+runAsService: false
+pipeline:
+  itemsPerBatch: 50
+  harvestTime: 15
+  exportWorkers: 3
+log:
+  level: warn
+  fileName: trace.log
+
+bitmovinMetricPrefix: bitmovin.
+bitmovinApiKey: xxxxx
+bitmovinLicenseKey: xxxxx
+bitmovinTenantOrg: xxxxx
+queries:
+## Default Queries
+- type: max_concurrentviewers
+- type: average
+  metric: REBUFFER_PERCENTAGE
+- type: count
+  metric: PLAY_ATTEMPTS
+- type: count
+  metric: IMPRESSION_ID
+  filters:
+    VIDEOSTART_FAILED_REASON:
+      operator: NE
+      value: PAGE_CLOSED
+    VIDEOSTART_FAILED:
+      operator: EQ
+      value: true
+- type: count
+  metric: VIDEO_STARTUPTIME
+  filters:
+    VIDEO_STARTUPTIME:
+      operator: GT
+      value: 0
+    PAGE_LOAD_TYPE:
+      operator: EQ
+      value: 1
+- type: average
+  metric: VIDEO_BITRATE
+  filters:
+    VIDEO_BITRATE:
+      operator: GT
+      value: 0
+- type: average
+  metric: VIEWTIME
+  orderBy:
+  - name: FUNCTION
+    order: DESC
+  - name: MINUTE
+    order: DESC
+## Custom queries
+- type: avg_concurrentviewers
+- type: avg_dropped_frames
+- type: average
+  metric: ERROR_PERCENTAGE
+  dimensions:
+  - CDN_PROVIDER
+- type: percentile
+  metric: VIDEO_BITRATE
+  percentile: 95
+  filters:
+    VIDEO_BITRATE:
+      operator: GT
+      value: 0

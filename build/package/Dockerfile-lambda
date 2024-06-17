@@ -1,0 +1,5 @@
+FROM public.ecr.aws/lambda/provided:al2
+
+COPY newrelic-bitmovin-analytics /main
+COPY configs/standard-config.yml /var/task/configs/config.yml
+ENTRYPOINT [ "/main" ]

@@ -1,5 +1,5 @@
-# This is an example .goreleaser.yml file with some sensible defaults.
-# Make sure to check the documentation at https://goreleaser.com
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+version: 2
 before:
   hooks:
     # You may remove this if you don't use go modules.
@@ -7,7 +7,7 @@ before:
 
 builds:
   - id: standalone
-    main: ./cmd/main.go
+    main: ./cmd/bitmovin/bitmovin.go
     env:
       - CGO_ENABLED=0
     goos:
@@ -16,9 +16,23 @@ builds:
     goarch:
       - "386"
       - amd64
+    ldflags:
+      - '-s -w -X main.gInterationVersion={{.Version}} -X main.gGitCommit={{.Commit}} -X main.gBuildDate={{.Date}}'
+  - id: lambda
+    main: ./cmd/bitmovin-lambda/bitmovin-lambda.go
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+    ldflags:
+      - '-s -w -X main.gInterationVersion={{.Version}} -X main.gGitCommit={{.Commit}} -X main.gBuildDate={{.Date}}'
 
 archives:
-  - format: tar.gz
+  - builds:
+      - standalone
+    format: tar.gz
     # this name template makes the OS and Arch compatible with the results of uname.
     name_template: >-
       {{ .ProjectName }}_
@@ -33,6 +47,26 @@ archives:
 
 checksum:
   name_template: 'checksums.txt'
+
+dockers:
+  - id: standalone
+    ids:
+      - standalone
+    image_templates:
+    - "newrelic-bitmovin-analytics:latest"
+    - "newrelic-bitmovin-analytics:{{ .Tag }}"
+    dockerfile: ./build/package/Dockerfile
+    extra_files:
+    - configs/standard-config.yml
+  - id: lambda
+    ids:
+      - lambda
+    image_templates:
+    - "newrelic-bitmovin-analytics:lambda-latest"
+    - "newrelic-bitmovin-analytics:lambda-{{ .Tag }}"
+    dockerfile: ./build/package/Dockerfile-lambda
+    extra_files:
+    - configs/standard-config.yml
 
 snapshot:
   name_template: "{{ incpatch .Version }}-next"

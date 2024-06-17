@@ -32,7 +32,6 @@ func main() {
 	i, err := integration.NewStandaloneIntegration(
 		&gBuildInfo,
 		gBuildInfo.Name,
-		"",
 		integration.WithInterval(60),
 		integration.WithLicenseKey(),
 	)
