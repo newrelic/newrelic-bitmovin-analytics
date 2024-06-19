@@ -53,8 +53,8 @@ dockers:
     ids:
       - standalone
     image_templates:
-    - "newrelic-bitmovin-analytics:latest"
-    - "newrelic-bitmovin-analytics:{{ .Tag }}"
+    - "newrelic/newrelic-bitmovin-analytics:latest"
+    - "newrelic/newrelic-bitmovin-analytics:{{ .Tag }}"
     dockerfile: ./build/package/Dockerfile
     extra_files:
     - configs/standard-config.yml
@@ -62,8 +62,8 @@ dockers:
     ids:
       - lambda
     image_templates:
-    - "newrelic-bitmovin-analytics:lambda-latest"
-    - "newrelic-bitmovin-analytics:lambda-{{ .Tag }}"
+    - "newrelic/newrelic-bitmovin-analytics:lambda-latest"
+    - "newrelic/newrelic-bitmovin-analytics:lambda-{{ .Tag }}"
     dockerfile: ./build/package/Dockerfile-lambda
     extra_files:
     - configs/standard-config.yml
