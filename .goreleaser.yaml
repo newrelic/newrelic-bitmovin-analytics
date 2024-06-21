@@ -18,16 +18,6 @@ builds:
       - amd64
     ldflags:
       - '-s -w -X main.gInterationVersion={{.Version}} -X main.gGitCommit={{.Commit}} -X main.gBuildDate={{.Date}}'
-  - id: lambda
-    main: ./cmd/bitmovin-lambda/bitmovin-lambda.go
-    env:
-      - CGO_ENABLED=0
-    goos:
-      - linux
-    goarch:
-      - amd64
-    ldflags:
-      - '-s -w -X main.gInterationVersion={{.Version}} -X main.gGitCommit={{.Commit}} -X main.gBuildDate={{.Date}}'
 
 archives:
   - builds:
@@ -56,15 +46,6 @@ dockers:
     - "newrelic/newrelic-bitmovin-analytics:latest"
     - "newrelic/newrelic-bitmovin-analytics:{{ .Tag }}"
     dockerfile: ./build/package/Dockerfile
-    extra_files:
-    - configs/standard-config.yml
-  - id: lambda
-    ids:
-      - lambda
-    image_templates:
-    - "newrelic/newrelic-bitmovin-analytics:lambda-latest"
-    - "newrelic/newrelic-bitmovin-analytics:lambda-{{ .Tag }}"
-    dockerfile: ./build/package/Dockerfile-lambda
     extra_files:
     - configs/standard-config.yml
 

@@ -1,0 +1,181 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Sample CloudFormation template for deploying the AWS Lambda image.
+
+Parameters:
+  #
+  # ARN of the lambda execution role used to execute the lambda.
+  #
+  ExecRoleArn:
+    Type: String
+    Description: ARN of the IAM role used for lambda execution.
+    AllowedPattern: 'arn:(aws[a-zA-Z-]*)?:iam::\d{12}:role/?[a-zA-Z_0-9+=,.@\-_/]+'
+  #
+  # Name of the lambda function.
+  #
+  FunctionName:
+    Type: String
+    Description: Name of the lambda function.
+    Default: NewRelicBitmovinAnalytics
+  #
+  # Timeout (in seconds) for the lambda function.
+  #
+  FunctionTimeout:
+    Type: Number
+    Description: Timeout (in seconds) for the lambda function.
+    MinValue: 1
+    MaxValue: 900
+    Default: 60
+  #
+  # Memory size for the lambda function.
+  #
+  FunctionMemorySize:
+    Type: Number
+    Description: Memory size for the lambda function.
+    MinValue: 128
+    MaxValue: 10240
+    Default: 256
+  #
+  # S3 Bucket name holding the deployment package
+  #
+  S3BucketName:
+    Type: String
+    Description: Name of the S3 bucket holding the deployment package .zip file.
+    AllowedPattern: '^[0-9A-Za-z\.\-_]*(?<!\.)$'
+  #
+  # S3 Bucket key of the deployment package S3 object
+  #
+  S3BucketKey:
+    Type: String
+    Description: Key of the deployment package .zip file S3 object.
+    Default: newrelic-bitmovin-lambda.zip
+  #
+  # New Relic license key for ingest
+  #
+  NewRelicLicenseKey:
+    Type: String
+    Description: Your New Relic license key.
+    AllowedPattern: '[a-zA-Z0-9\-_]*'
+  #
+  # New Relic region for ingest
+  #
+  NewRelicRegion:
+    Type: String
+    Description: The region of your New Relic account.
+    AllowedPattern: 'US|EU'
+    Default: 'US'
+  #
+  # New Relic APM application name used by the APM Go agent
+  #
+  NewRelicApmAppName:
+    Type: String
+    Description: New Relic APM application name.
+    AllowedPattern: '[a-zA-Z0-9\-_ \.]*'
+    Default: 'New Relic Bitmovin Analytics Lambda'
+  #
+  # Bitmovin API key
+  #
+  BitmovinApiKey:
+    Type: String
+    Description: Your Bitmovin API key.
+  #
+  # Bitmovin license key
+  #
+  BitmovinLicenseKey:
+    Type: String
+    Description: Your Bitmovin license key.
+  #
+  # Bitmovin tenant org ID
+  #
+  BitmovinTenantOrg:
+    Type: String
+    Description: Your Bitmovin tenant org ID.
+
+Resources:
+
+  #
+  # The lambda.
+  #
+
+  NewRelicBitmovinAnalyticsLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      PackageType: Zip
+      Code:
+        S3Bucket: !Ref S3BucketName
+        S3Key: !Ref S3BucketKey
+      Role: !Ref ExecRoleArn
+      Runtime: provided.al2023
+      Handler: bootstrap
+      Description: A lambda for retreiving bitmovin data and exporting it to New Relic.
+      FunctionName: !Ref FunctionName
+      Timeout: !Ref FunctionTimeout
+      MemorySize: !Ref FunctionMemorySize
+      Environment:
+        Variables:
+          # New Relic variables
+          NEW_RELIC_LICENSE_KEY: !Ref NewRelicLicenseKey
+          NEW_RELIC_REGION: !Ref NewRelicRegion
+          NEW_RELIC_APP_NAME: !Ref NewRelicApmAppName
+
+          # Bitmovin variables
+          BITMOVINAPIKEY: !Ref BitmovinApiKey
+          BITMOVINLICENSEKEY: !Ref BitmovinLicenseKey
+          BITMOVINTENANTORG: !Ref BitmovinTenantOrg
+
+  #
+  # Execution role used by EventBridge to execute the Bitmovin lambda.
+  #
+
+  NewRelicBitmovinLambdaEventBridgeExecRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - scheduler.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Description: Execution role for the Bitmovin lambda target invocation.
+      Policies:
+      - PolicyName: InvokeBitmovinLambda
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+              - 'lambda:InvokeFunction'
+              Resource:
+              - !GetAtt NewRelicBitmovinAnalyticsLambda.Arn
+      RoleName: NewRelicBitmovinLambda-EventBridgeExecRole
+
+  #
+  # The EventBridge schedule group for the Bitmovin lambda schedule.
+  #
+
+  NewRelicBitmovinLambdaEventBridgeScheduleGroup:
+    Type: AWS::Scheduler::ScheduleGroup
+    Properties:
+      Name: NewRelicBitmovinLambda-EventBridgeScheduleGroup
+
+  #
+  # The EventBridge schedule that will invoke the Bitmovin lambda.
+  #
+
+  NewRelicBitmovinLambdaEventBridgeSchedule:
+    Type: AWS::Scheduler::Schedule
+    Properties:
+      Description: This schedule will invoke the Bitmovin lambda.
+      FlexibleTimeWindow:
+        Mode: "OFF"
+      GroupName: !Ref NewRelicBitmovinLambdaEventBridgeScheduleGroup
+      Name: NewRelicBitmovinLambda-EventBridgeSchedule
+      ScheduleExpression: "cron(* * * * ? *)"
+      ScheduleExpressionTimezone: UTC
+      State: ENABLED
+      Target:
+        Arn: !GetAtt NewRelicBitmovinAnalyticsLambda.Arn
+        Input: "{}"
+        RoleArn: !GetAtt NewRelicBitmovinLambdaEventBridgeExecRole.Arn
