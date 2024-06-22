@@ -24,10 +24,12 @@ clean:
 
 bin/$(BINARY_NAME):
 	@echo "=== $(INTEGRATION) === [ compile ]: building $(BINARY_NAME)..."
+	@go mod tidy
 	@go build -v -ldflags '$(LDFLAGS)' -o bin/$(BINARY_NAME) $(BIN_FILES)
 
 bin/$(LAMBDA_BINARY_NAME):
 	@echo "=== $(INTEGRATION) === [ compile ]: building $(LAMBDA_BINARY_NAME)..."
+	@go mod tidy
 	@GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -ldflags '$(LDFLAGS)' \
 		-tags lambda.norpc -o bin/$(LAMBDA_BINARY_NAME) $(LAMBDA_BIN_FILES)
 
