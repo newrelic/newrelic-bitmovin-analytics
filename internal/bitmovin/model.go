@@ -82,7 +82,6 @@ type BitmovinQuery struct {
 	Interval 	*string 					`json:"interval,omitempty"`
 	Dimensions 	*[]string 					`json:"dimensions,omitempty"`
 	Filters 	*map[string]BitmovinFilter 	`json:"filters,omitempty"`
-	GroupBy 	*[]string 					`json:"groupBy,omitempty"`
 	OrderBy    	*[]BitmovinOrderBy  		`json:"orderBy,omitempty"`
 	Percentile	*int64						`json:"percentile,omitempty"`
 }

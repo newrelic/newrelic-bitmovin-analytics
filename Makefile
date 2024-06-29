@@ -16,7 +16,7 @@ LDFLAGS += -X main.gBuildDate=${BUILD_DATE}
 
 all: build
 
-build: clean compile compile-lambda
+build: clean compile compile-lambda compile-docker
 
 clean:
 	@echo "=== $(INTEGRATION) === [ clean ]: removing binaries..."
@@ -26,6 +26,12 @@ bin/$(BINARY_NAME):
 	@echo "=== $(INTEGRATION) === [ compile ]: building $(BINARY_NAME)..."
 	@go mod tidy
 	@go build -v -ldflags '$(LDFLAGS)' -o bin/$(BINARY_NAME) $(BIN_FILES)
+
+bin/docker/$(BINARY_NAME):
+	@echo "=== $(INTEGRATION) === [ compile ]: building Docker binary $(BINARY_NAME)..."
+	@go mod tidy
+	@GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -ldflags '$(LDFLAGS)' \
+		-o bin/docker/$(BINARY_NAME) $(BIN_FILES)
 
 bin/$(LAMBDA_BINARY_NAME):
 	@echo "=== $(INTEGRATION) === [ compile ]: building $(LAMBDA_BINARY_NAME)..."
@@ -37,6 +43,16 @@ compile: bin/$(BINARY_NAME)
 
 compile-lambda: bin/$(LAMBDA_BINARY_NAME)
 
+compile-docker: bin/docker/$(BINARY_NAME)
+
+docker: build
+	@docker build -t newrelic-bitmovin-analytics:latest \
+		-f build/package/Dockerfile \
+		.
+
+package-lambda: build
+	@./scripts/lambda/build.sh
+
 deploy-lambda: build
 	@./scripts/lambda/deploy.sh
 
@@ -46,4 +62,4 @@ update-lambda: build
 delete-lambda:
 	@./scripts/lambda/delete.sh
 
-.PHONY: all build clean compile compile-lambda deploy-lambda update-lambda delete-lambda
+.PHONY: all build clean compile compile-lambda compile-docker docker deploy-lambda update-lambda delete-lambda
