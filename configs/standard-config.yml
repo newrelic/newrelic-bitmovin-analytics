@@ -3,7 +3,7 @@ region: US
 interval: 60
 runAsService: false
 pipeline:
-  bufferSize: 50
+  receiveBufferSize: 50
   harvestInterval: 15
   instances: 3
 log:

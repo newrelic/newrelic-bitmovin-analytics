@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/aws/aws-lambda-go v1.47.0
-	github.com/newrelic/newrelic-labs-sdk v1.2.0
+	github.com/newrelic/newrelic-labs-sdk v1.3.0
 	github.com/spf13/viper v1.19.0
 )
 

@@ -526,7 +526,7 @@ See the [query configuration](#query-configuration) section for more details.
 
 ##### Pipeline configuration
 
-###### `bufferSize`
+###### `receiveBufferSize`
 
 | Description | Valid Values | Required | Default |
 | --- | --- | --- | --- |
@@ -536,7 +536,7 @@ This parameter specifies the size of the buffer that holds received items before
 being flushed through the processing chain and on to the exporters. When this
 size is reached, the items in the buffer will be flushed automatically.
 
-###### `harvestTime`
+###### `harvestInterval`
 
 | Description | Valid Values | Required | Default |
 | --- | --- | --- | --- |
