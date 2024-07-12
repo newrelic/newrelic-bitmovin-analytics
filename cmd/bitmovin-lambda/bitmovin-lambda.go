@@ -35,7 +35,7 @@ func HandleRequest(ctx context.Context, event any) (
   error,
 ) {
 	// Create the integration with options
-	i, err := integration.NewStandaloneIntegration(
+	i, err := integration.NewLambdaIntegration(
 		&gBuildInfo,
 		gBuildInfo.Name,
 		integration.WithInterval(60),
