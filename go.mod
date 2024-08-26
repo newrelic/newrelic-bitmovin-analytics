@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/aws/aws-lambda-go v1.47.0
-	github.com/newrelic/newrelic-labs-sdk v1.3.1
+	github.com/newrelic/newrelic-labs-sdk v1.5.0
 	github.com/spf13/viper v1.19.0
 )
 
@@ -55,4 +55,4 @@ require (
 )
 
 // @TODO: remove after development
-//replace github.com/newrelic/newrelic-labs-sdk v1.3.1 => ../newrelic-labs-sdk
+//replace github.com/newrelic/newrelic-labs-sdk v1.5.0 => ../newrelic-labs-sdk
