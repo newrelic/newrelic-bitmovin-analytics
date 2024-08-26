@@ -1,21 +1,18 @@
-apiKey: XXXXXX
-licenseKey: XXXXXX
-accountId: 0
+licenseKey: ZZZZZZ
 region: US
 interval: 60
 runAsService: false
 pipeline:
-  itemsPerBatch: 50
-  harvestTime: 15
-  exportWorkers: 3
+  receiveBufferSize: 50
+  harvestInterval: 15
+  instances: 3
 log:
   level: warn
   fileName: trace.log
-
 bitmovinMetricPrefix: bitmovin.
-bitmovinApiKey: xxxxx
-bitmovinLicenseKey: xxxxx
-bitmovinTenantOrg: xxxxx
+bitmovinApiKey: ZZZZZZ
+bitmovinLicenseKey: ZZZZZZ
+bitmovinTenantOrg: ZZZZZZ
 queries:
 ## Default Queries
 - type: max_concurrentviewers
