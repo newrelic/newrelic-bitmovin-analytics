@@ -386,7 +386,7 @@ for a full configuration example.
 ##### General configuration
 
 The parameters in this section are configured at the top level of the
-[`configy.yml`](#configyml).
+[`config.yml`](#configyml).
 
 ###### `licenseKey`
 
@@ -442,7 +442,7 @@ use with an external scheduling mechanism like [cron](https://man7.org/linux/man
 
 | Description | Valid Values | Required | Default |
 | --- | --- | --- | --- |
-| The root element for the set of [pipeline configuration](#pipeline-configuration) parameters  | YAML Sequence | N | N/a |
+| The root node for the set of [pipeline configuration](#pipeline-configuration) parameters  | YAML Sequence | N | N/a |
 
 The integration retrieves, processes, and exports metrics to New Relic using
 a data pipeline consisting of one or more receivers, a processing chain, and a
@@ -546,7 +546,7 @@ This parameter specifies the interval (in _seconds_) at which the pipeline
 should automatically flush received items through the processing chain and on
 to the exporters. Each time this interval is reached, the pipeline will flush
 items even if the item buffer has not reached the size specified by the
-[`bufferSize`](#bufferSize) parameter.
+[`receiveBufferSize`](#bufferSize) parameter.
 
 ###### `instances`
 
@@ -560,7 +560,7 @@ New Relic exporter. When [`runAsService`](#runasservice) is `true`, the
 integration can launch one or more "instances" of this pipeline to receive,
 process, and export data concurrently. Each "instance" will be configured with
 the same processing chain and exporter and the receivers will be spread across
-the available instance in a round-robin fashion.
+the available instances in a round-robin fashion.
 
 This parameter specifies the number of pipeline instances to launch.
 
@@ -688,11 +688,11 @@ See the [Query Examples section](#query-examples) for additional examples.
 This parameter is a set of key/value pairs where the key is an
 [API field](https://developer.bitmovin.com/playback/docs/analytics-api-fields)
 name and the value is a set with exactly two key/value pairs: the filter
-`operation` type and a constraint `value`. API field names are specified using
-upper snake case. The `operation` key/value pair may have one of the following
+`operator` type and a constraint `value`. API field names are specified using
+upper snake case. The `operator` key/value pair may have one of the following
 values.
 
-| Filter Operation |
+| Filter Operator |
 | --- |
 | `IN` |
 | `EQ` |
@@ -710,7 +710,7 @@ those where the `DURATION` value is greater than `100`.
 ```yaml
 filters:
   DURATION:
-    operation: GT
+    operator: GT
     value: 100
 ```
 
@@ -805,7 +805,7 @@ queries:
   metric: IMPRESSION_ID
   filters:
     VIDEO_STARTUPTIME:
-      operation: GT
+      operator: GT
       value: 0
 ```
 
@@ -827,7 +827,7 @@ queries:
   metric: USER_ID
   filters:
     VIDEO_STARTUPTIME:
-      operation: GT
+      operator: GT
       value: 0
 ```
 
@@ -836,8 +836,7 @@ queries:
 ```yaml
 queries:
 # ...
-- type: count
-  metric: max_concurrentviewers
+- type: max_concurrentviewers
 ```
 
 **[Total Page Loads](https://developer.bitmovin.com/playback/docs/how-to-recreate-dashboard-queries-via-the-api-1#total-page-loads)**
@@ -849,7 +848,7 @@ queries:
   metric: IMPRESSION_ID
   filters:
     PLAYER_STARTUPTIME:
-      operation: GT
+      operator: GT
       value: 0
 ```
 
@@ -862,7 +861,7 @@ queries:
   metric: PLAYED
   filters:
     PLAYED:
-      operation: GT
+      operator: GT
       value: 0
 ```
 
@@ -887,10 +886,10 @@ queries:
   metric: STARTUPTIME
   filters:
     PAGE_LOAD_TYPE:
-      operation: EQ
+      operator: EQ
       value: 1
     STARTUPTIME:
-      operation: GT
+      operator: GT
       value: 0
 ```
 
@@ -903,10 +902,10 @@ queries:
   metric: PLAYER_STARTUPTIME
   filters:
     PAGE_LOAD_TYPE:
-      operation: EQ
+      operator: EQ
       value: 1
     STARTUPTIME:
-      operation: GT
+      operator: GT
       value: 0
 ```
 
@@ -919,7 +918,7 @@ queries:
   metric: VIDEO_STARTUPTIME
   filters:
     VIDEO_STARTUPTIME:
-      operation: GT
+      operator: GT
       value: 0
 ```
 
@@ -932,7 +931,7 @@ queries:
   metric: SEEKED
   filters:
     SEEKED:
-      operation: GT
+      operator: GT
       value: 0
 ```
 
@@ -954,10 +953,10 @@ queries:
   metric: VIDEOSTART_FAILED
   filters:
     VIDEOSTART_FAILED_REASON:
-      operation: NE
+      operator: NE
       value: PAGE_CLOSED
     VIDEOSTART_FAILED:
-      operation: EQ
+      operator: EQ
       value: true
 ```
 
@@ -1006,7 +1005,7 @@ queries:
   metric: VIDEO_BITRATE
   filters:
     VIDEO_BITRATE:
-      operation: GT
+      operator: GT
       value: 0
 ```
 
