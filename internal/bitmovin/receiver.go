@@ -124,24 +124,48 @@ func bitmovinResponseDecoderBuilder(
 			log.PrettyPrintJson(apiResponse)
 		}
 
+		bitmovinMetricName := queryParams.Metric
+		if bitmovinMetricName == "" {
+			bitmovinMetricName = queryParams.BMDimension
+		}
+
 		// Generate the metrics
 		LOOP:
 
 		for i := 0; i < len(apiResponse.Data.Result.Rows); i += 1 {
-			if len(apiResponse.Data.Result.Rows[i]) == 0 {
-				log.Debugf("skipping response row %d because it is empty", i)
+			colCount := len(apiResponse.Data.Result.Rows[i])
+			if colCount == 0 {
+				log.Debugf(
+					"skipping row %d for metric %s because it is empty",
+					i,
+					bitmovinMetricName,
+				)
 				continue
 			}
 
-			if apiResponse.Data.Result.Rows[i][0] == nil {
-				log.Debugf("skipping row %d: first column is nil", i)
-				break
+			// Validate we have the number of columns we think we should
+			// timestamp column + # of dimension columns + value column
+			expectedColCount := 1 + len(queryParams.GroupBy) + 1
+			if colCount != expectedColCount {
+				log.Warnf(
+					"skipping row %d for metric %s: unexpected number of columns: %d: expected number of columns: %d",
+					i,
+					bitmovinMetricName,
+					colCount,
+					expectedColCount,
+				)
+				continue
 			}
 
 			// JSON numbers are always decoded as floats
 			timestamp, ok := apiResponse.Data.Result.Rows[i][0].(float64)
 			if !ok {
-				log.Warnf("skipping row %d: timestamp column is not a float: %v", i, timestamp)
+				log.Warnf(
+					"skipping row %d for metric %s: timestamp column is not a float: %T",
+					i,
+					bitmovinMetricName,
+					apiResponse.Data.Result.Rows[i][0],
+				)
 				continue
 			}
 
@@ -149,22 +173,38 @@ func bitmovinResponseDecoderBuilder(
 			// and the value.
 
 			j := 1
-			dimensions := make(map[string]string)
+			dimensions := make(map[string]interface{})
 
 			for _, dimension := range queryParams.GroupBy {
-				val, ok := apiResponse.Data.Result.Rows[i][j].(string)
-				if !ok {
-					log.Warnf("skipping row %d: dimension column %s is not a string: %v", j, dimension, val)
+				dimVal := apiResponse.Data.Result.Rows[i][j]
+				switch v := dimVal.(type) {
+				// Bitmovin dimensions can be 3 data types: string, int, bool
+				// JSON numbers are always decoded as floats
+				case string, bool, float64:
+					dimensions[dimension] = v
+					j += 1
+				default:
+					log.Warnf(
+						"skipping row %d for metric %s: dimension column %s is not a valid type: %T",
+						i,
+						bitmovinMetricName,
+						dimension,
+						dimVal,
+					)
 					continue LOOP
 				}
-				dimensions[dimension] = val
-				j += 1
 			}
 
-			// JSON numbers are always decoded as floats
+			// The metric value is a number and JSON numbers are always decoded
+			// as floats
 			val, ok := apiResponse.Data.Result.Rows[i][j].(float64)
 			if !ok {
-				log.Warnf("skipping row %d: value column is not a float: %v", i, val)
+				log.Warnf(
+					"skipping row %d for metric %s: value column is not a float: %T",
+					i,
+					bitmovinMetricName,
+					apiResponse.Data.Result.Rows[i][j],
+				)
 				continue
 			}
 
