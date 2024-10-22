@@ -1056,7 +1056,7 @@ queries:
 
 While not strictly enforced, the basic preferred editor settings are set in the
 [.editorconfig](./.editorconfig). Other than this, no style guidelines are
-currently imposed.
+currently  imposed.
 
 #### Static Analysis
 
