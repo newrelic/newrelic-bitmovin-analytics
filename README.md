@@ -311,6 +311,11 @@ can be prepared using the following steps.
 
 1. Clone this repository
 1. Navigate to the repository root
+1. To use an existing configuration file, copy it to a file named `config.yml`
+   in the `configs` directory. To create a new configuration file, copy the
+   [`configs/standard-config.yml`](./configs/standard-config.yml)
+   to `configs/config.yml` and customize it to [configure](#configuration) the
+   integration appropriately for your environment.
 1. Run the command `make package-lambda`
 
 On successful completion of the `make` process, the deployment package will be
@@ -326,8 +331,11 @@ this method, perform the following steps.
 
 1. Clone this repository
 1. Navigate to the repository root
-1. Copy the [`configs/standard-config.yml`](./configs/standard-config.yml) to
-   `configs/config.yml`
+1. To use an existing configuration file, copy it to a file named `config.yml`
+   in the `configs` directory. To create a new configuration file, copy the
+   [`configs/standard-config.yml`](./configs/standard-config.yml)
+   to `configs/config.yml` and customize it to [configure](#configuration) the
+   integration appropriately for your environment.
 1. Copy the [`deployments/lambda/cf-params.sample.json`](./deployments/lambda/cf-params.sample.json)
    to `deployments/lambda/cf-params.json`
 1. Use the parameter descriptions in the CloudFormation template at

@@ -1,5 +1,3 @@
-#!/bin/bash
-
 if [ "$SCRIPT_DIR" = "" ]; then
   SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 fi
