@@ -1,0 +1,54 @@
+licenseKey: ZZZZZZ
+region: US
+interval: 60
+runAsService: false
+pipeline:
+  receiveBufferSize: 50
+  harvestInterval: 15
+  instances: 3
+log:
+  level: warn
+  fileName: trace.log
+bitmovinMetricPrefix: bitmovin.
+bitmovinApiKey: ZZZZZZ
+bitmovinLicenseKey: ZZZZZZ
+bitmovinTenantOrg: ZZZZZZ
+bitmovinNullValueString: "<NULL>"
+queries:
+## Default Queries
+- type: max_concurrentviewers
+- type: average
+  metric: REBUFFER_PERCENTAGE
+- type: count
+  metric: PLAY_ATTEMPTS
+- type: count
+  metric: IMPRESSION_ID
+  filters:
+    VIDEOSTART_FAILED_REASON:
+      operator: NE
+      value: PAGE_CLOSED
+    VIDEOSTART_FAILED:
+      operator: EQ
+      value: true
+- type: count
+  metric: VIDEO_STARTUPTIME
+  filters:
+    VIDEO_STARTUPTIME:
+      operator: GT
+      value: 0
+    PAGE_LOAD_TYPE:
+      operator: EQ
+      value: 1
+- type: average
+  metric: VIDEO_BITRATE
+  filters:
+    VIDEO_BITRATE:
+      operator: GT
+      value: 0
+- type: average
+  metric: VIEWTIME
+  orderBy:
+  - name: FUNCTION
+    order: DESC
+  - name: MINUTE
+    order: DESC

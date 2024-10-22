@@ -1,0 +1,50 @@
+[
+    {
+        "ParameterKey": "ExecRoleArn",
+        "ParameterValue": "arn:aws:iam::12345:role/my-execute-lambda-role"
+    },
+    {
+        "ParameterKey": "FunctionName",
+        "ParameterValue": "NewRelicBitmovinAnalytics"
+    },
+    {
+        "ParameterKey": "FunctionTimeout",
+        "ParameterValue": "60"
+    },
+    {
+        "ParameterKey": "FunctionMemorySize",
+        "ParameterValue": "256"
+    },
+    {
+        "ParameterKey": "S3BucketName",
+        "ParameterValue": "my-bucket"
+    },
+    {
+        "ParameterKey": "S3BucketKey",
+        "ParameterValue": "newrelic-bitmovin-lambda.zip"
+    },
+    {
+        "ParameterKey": "NewRelicLicenseKey",
+        "ParameterValue": "123456"
+    },
+    {
+        "ParameterKey": "NewRelicRegion",
+        "ParameterValue": "US"
+    },
+    {
+        "ParameterKey": "NewRelicApmAppName",
+        "ParameterValue": "New Relic Bitmovin Analytics Lambda"
+    },
+    {
+        "ParameterKey": "BitmovinApiKey",
+        "ParameterValue": "567890"
+    },
+    {
+        "ParameterKey": "BitmovinLicenseKey",
+        "ParameterValue": "ABCDEFG"
+    },
+    {
+        "ParameterKey": "BitmovinTenantOrg",
+        "ParameterValue": "12345-ABCDEF"
+    }
+]
