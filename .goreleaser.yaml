@@ -18,6 +18,17 @@ builds:
       - amd64
     ldflags:
       - '-s -w -X main.gInterationVersion={{.Version}} -X main.gGitCommit={{.Commit}} -X main.gBuildDate={{.Date}}'
+  - id: docker
+    main: ./cmd/bitmovin/bitmovin.go
+    binary: bin/docker/newrelic-bitmovin-analytics
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+    ldflags:
+      - '-s -w -X main.gInterationVersion={{.Version}} -X main.gGitCommit={{.Commit}} -X main.gBuildDate={{.Date}}'
 
 archives:
   - builds:
@@ -39,9 +50,9 @@ checksum:
   name_template: 'checksums.txt'
 
 dockers:
-  - id: standalone
+  - id: docker
     ids:
-      - standalone
+      - docker
     image_templates:
     - "newrelic/newrelic-bitmovin-analytics:latest"
     - "newrelic/newrelic-bitmovin-analytics:{{ .Tag }}"
