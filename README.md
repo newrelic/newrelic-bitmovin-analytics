@@ -1196,7 +1196,7 @@ reporting it to New Relic through [HackerOne](https://hackerone.com/newrelic).
 
 If you would like to contribute to this project, review [these guidelines](./CONTRIBUTING.md).
 
-To all contributors, we thank you!  Without your contribution, this project
+To all contributors, we thank you! Without your contribution, this project
 would not be what it is today.
 
 ### License
