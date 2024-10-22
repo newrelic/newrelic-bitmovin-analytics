@@ -511,6 +511,28 @@ that will be used whe making requests to the Bitmovin Analytics API.
 The tenant org can also be specified using the `BITMOVINTENANTORG` environment
 variable.
 
+###### `bitmovinNullValueString`
+
+| Description | Valid Values | Required | Default |
+| --- | --- | --- | --- |
+| String value to use for New Relic Metric dimension values corresponding to `NULL` dimension values returned from the Bitmovin Analytics API | string | N | `<NULL>` |
+
+In Bitmovin Analytics, `NULL` is a valid value for some metric dimensions.
+However, [New Relic Metrics](https://docs.newrelic.com/docs/data-apis/understand-data/new-relic-data-types/#metrics-new-relic)
+does not allow `null` values for metric dimensions. This parameter specifies the
+value to be used for a New Relic Metric dimension value that corresponds to a
+Bitmovin Analytics `NULL` metric dimension value.
+
+If not specified, the string literal `<NULL>` is used by default. Should this
+literal value be a valid string value for one or more dimensions in Bitmovin
+Analytics, this parameter can be used to specify an alternate value to be used
+for an actual `NULL` value returned for a Bitmovin Analytics metric dimension
+versus the literal string `<NULL>` returned for a Bitmovin Analytics metric
+dimension. Note that this value can not be configured per Bitmovin Analytics
+dimension so the value specified with this parameter must not be a valid literal
+value for _any_ dimension in Bitmovin Analytics (including any
+[custom data fields](https://developer.bitmovin.com/playback/docs/how-many-custom-data-fields-are-included)).
+
 ##### `queries`
 
 | Description | Valid Values | Required | Default |

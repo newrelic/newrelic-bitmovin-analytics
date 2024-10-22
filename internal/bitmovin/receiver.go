@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	DEFAULT_NIL_GROUP_STRING = "<NULL>"
+	DEFAULT_NULL_VALUE_STRING = "<NULL>"
 	BaseURL = "https://api.bitmovin.com"
 )
 
@@ -114,9 +114,9 @@ func bitmovinResponseDecoderBuilder(
 
 		log.Debugf("decoding bitmovin JSON response")
 
-		nilGroupString := viper.GetString("bitmovinNilGroupString")
-		if nilGroupString == "" {
-			nilGroupString = DEFAULT_NIL_GROUP_STRING
+		nullValueString := viper.GetString("bitmovinNullValueString")
+		if nullValueString == "" {
+			nullValueString = DEFAULT_NULL_VALUE_STRING
 		}
 
 		dec := json.NewDecoder(in)
@@ -190,9 +190,9 @@ func bitmovinResponseDecoderBuilder(
 					dimensions[dimension] = v
 					j += 1
 				case nil:
-					// @todo: is there a better way to handle nil group
+					// @todo: is there a better way to handle null group
 					// values?
-					dimensions[dimension] = nilGroupString
+					dimensions[dimension] = nullValueString
 					j += 1
 				default:
 					log.Warnf(
