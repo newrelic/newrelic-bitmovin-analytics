@@ -13,6 +13,7 @@ bitmovinMetricPrefix: bitmovin.
 bitmovinApiKey: ZZZZZZ
 bitmovinLicenseKey: ZZZZZZ
 bitmovinTenantOrg: ZZZZZZ
+bitmovinNilGroupString: "<NULL>"
 queries:
 ## Default Queries
 - type: max_concurrentviewers

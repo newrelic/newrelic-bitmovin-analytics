@@ -17,6 +17,7 @@ import (
 )
 
 const (
+	DEFAULT_NIL_GROUP_STRING = "<NULL>"
 	BaseURL = "https://api.bitmovin.com"
 )
 
@@ -113,6 +114,11 @@ func bitmovinResponseDecoderBuilder(
 
 		log.Debugf("decoding bitmovin JSON response")
 
+		nilGroupString := viper.GetString("bitmovinNilGroupString")
+		if nilGroupString == "" {
+			nilGroupString = DEFAULT_NIL_GROUP_STRING
+		}
+
 		dec := json.NewDecoder(in)
 
 		err := dec.Decode(&apiResponse)
@@ -182,6 +188,11 @@ func bitmovinResponseDecoderBuilder(
 				// JSON numbers are always decoded as floats
 				case string, bool, float64:
 					dimensions[dimension] = v
+					j += 1
+				case nil:
+					// @todo: is there a better way to handle nil group
+					// values?
+					dimensions[dimension] = nilGroupString
 					j += 1
 				default:
 					log.Warnf(
