@@ -247,6 +247,10 @@ func addReceiver(
 	id string,
 	queryParams *BitmovinQueryParams,
 ) {
+	timeout := viper.GetUint("bitmovinTimeout")
+	if timeout <= 0 {
+		timeout = 10
+	}
 	mp.AddReceiver(
 		pipeline.NewSimpleReceiver(
 			id,
@@ -262,6 +266,7 @@ func addReceiver(
 				queryParams,
 				metricPrefix,
 			)),
+			pipeline.WithTimeout(time.Duration(timeout) * time.Second),
 		),
 	)
 }

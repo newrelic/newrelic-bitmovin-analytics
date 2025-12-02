@@ -541,6 +541,15 @@ dimension so the value specified with this parameter must not be a valid literal
 value for _any_ dimension in Bitmovin Analytics (including any
 [custom data fields](https://developer.bitmovin.com/playback/docs/how-many-custom-data-fields-are-included)).
 
+###### `bitmovinTimeout`
+
+| Description | Valid Values | Required | Default |
+| --- | --- | --- | --- |
+| Timeout for Bitmovin API connections in seconds. | numeric | N | 10 |
+
+Timeout in seconds used for all Bitmovin API connections.
+If not defined or set to zero, 10 will be used.
+
 ##### `queries`
 
 | Description | Valid Values | Required | Default |
