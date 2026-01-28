@@ -805,7 +805,19 @@ values are supported.
 
 See the [Query Examples section](#query-examples) for example usages.
 
+###### Query `name`
+
+| Description | Valid Values | Required | Default |
+| --- | --- | --- | --- |
+| Metric name. | string | N | N/a |
+
+This parameter specifies the metric name for a given query. If present, it has precedence over the default name
+generated using [`type`](#query-type) and [`metric`](#query-metric), and the final metric name is generated using the [`metric prefix`](#bitmovinmetricprefix)
+plus the `name` parameter.
+
 ###### Bitmovin to New Relic metric mapping
+
+> NOTE: The information exposed below only applies if the [`name`](#query-name) parameter is not specified.
 
 Metrics returned from the Bitmovin API are all mapped to
 [New Relic gauge metrics](https://docs.newrelic.com/docs/data-apis/understand-data/metric-data/metric-data-type/)

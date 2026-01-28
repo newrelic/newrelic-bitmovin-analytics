@@ -215,8 +215,16 @@ func bitmovinResponseDecoderBuilder(
 				continue
 			}
 
+			var metricName string
+
+			if queryParams.Name == "" {
+				metricName = fmt.Sprintf("%s%s", metricPrefix, queryParams.NRMetric)
+			} else {
+				metricName = fmt.Sprintf("%s%s", metricPrefix, queryParams.Name)
+			}
+
 			metric := model.NewGaugeMetric(
-				fmt.Sprintf("%s%s", metricPrefix, queryParams.NRMetric),
+				metricName,
 				model.MakeNumeric(val),
 				time.Unix(int64(timestamp/1000), 0),
 			)
@@ -326,6 +334,7 @@ func addReceiverWithQuery(
 	switch query.Type {
 	case "max_concurrentviewers":
 		queryParams = &BitmovinQueryParams{
+			Name:        query.Name,
 			URI:         "/v1/analytics/metrics/max_concurrentviewers",
 			NRMetric:    "max_concurrent_viewers",
 			Metric:      "max_concurrentviewers",
@@ -337,6 +346,7 @@ func addReceiverWithQuery(
 		}
 	case "avg_concurrentviewers":
 		queryParams = &BitmovinQueryParams{
+			Name:        query.Name,
 			URI:         "/v1/analytics/metrics/avg_concurrentviewers",
 			NRMetric:    "avg_concurrent_viewers",
 			Metric:      "avg_concurrentviewers",
@@ -348,6 +358,7 @@ func addReceiverWithQuery(
 		}
 	case "avg_dropped_frames":
 		queryParams = &BitmovinQueryParams{
+			Name:        query.Name,
 			URI:         "/v1/analytics/metrics/avg_dropped_frames",
 			NRMetric:    "avg_dropped_frames",
 			Metric:      "avg_dropped_frames",
@@ -359,6 +370,7 @@ func addReceiverWithQuery(
 		}
 	case "count":
 		queryParams = &BitmovinQueryParams{
+			Name:        query.Name,
 			URI:         "/v1/analytics/queries/count",
 			NRMetric:    fmt.Sprintf("cnt_%s", strings.ToLower(query.Metric)),
 			Metric:      "",
@@ -370,6 +382,7 @@ func addReceiverWithQuery(
 		}
 	case "sum":
 		queryParams = &BitmovinQueryParams{
+			Name:        query.Name,
 			URI:         "/v1/analytics/queries/sum",
 			NRMetric:    fmt.Sprintf("sum_%s", strings.ToLower(query.Metric)),
 			Metric:      "",
@@ -381,6 +394,7 @@ func addReceiverWithQuery(
 		}
 	case "average":
 		queryParams = &BitmovinQueryParams{
+			Name:        query.Name,
 			URI:         "/v1/analytics/queries/avg",
 			NRMetric:    fmt.Sprintf("avg_%s", strings.ToLower(query.Metric)),
 			Metric:      "",
@@ -392,6 +406,7 @@ func addReceiverWithQuery(
 		}
 	case "min":
 		queryParams = &BitmovinQueryParams{
+			Name:        query.Name,
 			URI:         "/v1/analytics/queries/min",
 			NRMetric:    fmt.Sprintf("min_%s", strings.ToLower(query.Metric)),
 			Metric:      "",
@@ -403,6 +418,7 @@ func addReceiverWithQuery(
 		}
 	case "max":
 		queryParams = &BitmovinQueryParams{
+			Name:        query.Name,
 			URI:         "/v1/analytics/queries/max",
 			NRMetric:    fmt.Sprintf("max_%s", strings.ToLower(query.Metric)),
 			Metric:      "",
@@ -414,6 +430,7 @@ func addReceiverWithQuery(
 		}
 	case "stddev":
 		queryParams = &BitmovinQueryParams{
+			Name:        query.Name,
 			URI:         "/v1/analytics/queries/stddev",
 			NRMetric:    fmt.Sprintf("stddev_%s", strings.ToLower(query.Metric)),
 			Metric:      "",
@@ -426,6 +443,7 @@ func addReceiverWithQuery(
 	case "percentile":
 		// @TODO: add percentile
 		queryParams = &BitmovinQueryParams{
+			Name:        query.Name,
 			URI:         "/v1/analytics/queries/percentile",
 			NRMetric:    fmt.Sprintf("p%d_%s", *query.Percentile, strings.ToLower(query.Metric)),
 			Metric:      "",
@@ -439,6 +457,7 @@ func addReceiverWithQuery(
 	case "variance":
 		// @TODO: add percentile
 		queryParams = &BitmovinQueryParams{
+			Name:        query.Name,
 			URI:         "/v1/analytics/queries/variance",
 			NRMetric:    fmt.Sprintf("var_%s", strings.ToLower(query.Metric)),
 			Metric:      "",
@@ -450,6 +469,7 @@ func addReceiverWithQuery(
 		}
 	case "median":
 		queryParams = &BitmovinQueryParams{
+			Name:        query.Name,
 			URI:         "/v1/analytics/queries/median",
 			NRMetric:    fmt.Sprintf("med_%s", strings.ToLower(query.Metric)),
 			Metric:      "",

@@ -79,6 +79,7 @@ type BitmovinFilter struct {
 type BitmovinQuery struct {
 	Type       string                     `json:"type"`
 	Metric     string                     `json:"metric"`
+	Name       string                     `json:"name"`
 	Interval   *string                    `json:"interval,omitempty"`
 	Dimensions *[]string                  `json:"dimensions,omitempty"`
 	Filters    *map[string]BitmovinFilter `json:"filters,omitempty"`
