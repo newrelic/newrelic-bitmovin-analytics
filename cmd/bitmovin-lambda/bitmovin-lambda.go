@@ -16,7 +16,7 @@ var (
 	gIntegrationVersion = "2.1.0"
 	gGitCommit          = ""
 	gBuildDate          = ""
-	gBuildInfo			= integration.BuildInfo{
+	gBuildInfo          = integration.BuildInfo{
 		Id:        gIntegrationID,
 		Name:      gIntegrationName,
 		Version:   gIntegrationVersion,
@@ -26,13 +26,13 @@ var (
 )
 
 type BitmovinLambdaResult struct {
-  Success           bool
-  Message           error
+	Success bool
+	Message error
 }
 
 func HandleRequest(ctx context.Context, event any) (
-  BitmovinLambdaResult,
-  error,
+	BitmovinLambdaResult,
+	error,
 ) {
 	// Create the integration with options
 	i, err := integration.NewLambdaIntegration(
@@ -43,27 +43,27 @@ func HandleRequest(ctx context.Context, event any) (
 	)
 	if err != nil {
 		log.Errorf("failed to create integration: %v", err)
-		return BitmovinLambdaResult{ false, err }, err
+		return BitmovinLambdaResult{false, err}, err
 	}
 
 	err = bitmovin.InitPipelines(i)
 	if err != nil {
 		log.Errorf("failed to initialize pipelines: %v", err)
-		return BitmovinLambdaResult{ false, err }, err
+		return BitmovinLambdaResult{false, err}, err
 	}
 
 	// Run the integration
 	defer i.Shutdown(ctx)
 
- 	err = i.Run(ctx)
+	err = i.Run(ctx)
 	if err != nil {
 		log.Errorf("integration failed: %v", err)
-		return BitmovinLambdaResult{ false, err }, err
+		return BitmovinLambdaResult{false, err}, err
 	}
 
-  return BitmovinLambdaResult{true, nil}, nil
+	return BitmovinLambdaResult{true, nil}, nil
 }
 
 func main() {
-  lambda.Start(HandleRequest)
+	lambda.Start(HandleRequest)
 }

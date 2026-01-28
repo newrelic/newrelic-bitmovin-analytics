@@ -15,7 +15,7 @@ var (
 	gIntegrationVersion = "2.1.0"
 	gGitCommit          = ""
 	gBuildDate          = ""
-	gBuildInfo			= integration.BuildInfo{
+	gBuildInfo          = integration.BuildInfo{
 		Id:        gIntegrationID,
 		Name:      gIntegrationName,
 		Version:   gIntegrationVersion,
@@ -42,7 +42,7 @@ func main() {
 
 	// Run the integration
 	defer i.Shutdown(ctx)
- 	err = i.Run(ctx)
+	err = i.Run(ctx)
 	fatalIfErr(err)
 }
 
