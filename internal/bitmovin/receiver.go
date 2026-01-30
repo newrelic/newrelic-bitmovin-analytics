@@ -333,7 +333,7 @@ func addReceiverWithQuery(
 	var queryParams *BitmovinQueryParams
 
 	if query.Name == "" {
-		log.Warnf("automatic metric names are DEPRECATED, add a 'name' parameter in your config for the query at position %d", queryPos+1)
+		log.Warnf("automatic metric names are DEPRECATED, add a 'name' parameter to your config file for the query at position %d", queryPos+1)
 	}
 
 	switch query.Type {
