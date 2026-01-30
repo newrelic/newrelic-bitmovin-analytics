@@ -13,7 +13,7 @@ var (
 	/* Args below are populated via ldflags at build time */
 	gIntegrationID      = "com.newrelic.labs.newrelic-bitmovin-analytics"
 	gIntegrationName    = "New Relic Bitmovin Analytics Integration Lambda"
-	gIntegrationVersion = "2.1.0"
+	gIntegrationVersion = "2.2.0"
 	gGitCommit          = ""
 	gBuildDate          = ""
 	gBuildInfo          = integration.BuildInfo{
