@@ -327,9 +327,14 @@ func addReceiverWithQuery(
 	licenseKey string,
 	metricPrefix string,
 	recvInterval time.Duration,
+	queryPos int,
 	query *BitmovinQuery,
 ) error {
 	var queryParams *BitmovinQueryParams
+
+	if query.Name == "" {
+		log.Warnf("automatic metric names are DEPRECATED, add a 'name' parameter in your config for the query at position %d", queryPos+1)
+	}
 
 	switch query.Type {
 	case "max_concurrentviewers":
@@ -503,14 +508,15 @@ func setupReceivers(
 	metricPrefix := viper.GetString("bitmovinMetricPrefix")
 	authenticator := NewBitmovinAuthenticator(credentials)
 
-	for _, query := range queries {
+	for pos := range queries {
 		err := addReceiverWithQuery(
 			mp,
 			authenticator,
 			credentials.licenseKey,
 			metricPrefix,
 			recvInterval,
-			&query,
+			pos,
+			&queries[pos],
 		)
 		if err != nil {
 			return err
