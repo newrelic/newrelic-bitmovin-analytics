@@ -18,12 +18,16 @@ bitmovinTimeout: 30
 queries:
 ## Default Queries
 - type: max_concurrentviewers
+  name: max_concurrent_viewers
 - type: average
   metric: REBUFFER_PERCENTAGE
+  name: avrg_rebuff_percent
 - type: count
   metric: PLAY_ATTEMPTS
+  name: count_play_attempts
 - type: count
   metric: IMPRESSION_ID
+  name: count_impression_id
   filters:
     VIDEOSTART_FAILED_REASON:
       operator: NE
@@ -33,6 +37,7 @@ queries:
       value: true
 - type: count
   metric: VIDEO_STARTUPTIME
+  name: count_video_startup_time
   filters:
     VIDEO_STARTUPTIME:
       operator: GT
@@ -42,12 +47,14 @@ queries:
       value: 1
 - type: average
   metric: VIDEO_BITRATE
+  name: avrg_video_bitrate
   filters:
     VIDEO_BITRATE:
       operator: GT
       value: 0
 - type: average
   metric: VIEWTIME
+  name: avrg_view_time
   orderBy:
   - name: FUNCTION
     order: DESC
