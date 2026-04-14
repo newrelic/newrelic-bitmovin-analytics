@@ -475,13 +475,8 @@ parameters related to [log configuration](#log-configuration).
 | A prefix to prepend to Bitmovin metric names | string | N | `''` |
 
 This parameter specifies a prefix that will be preprended to each Bitmovin
-metric name when the metric is exported to New Relic. Note that this is
-_in addition_ to the automatically prepended prefixes added to distinguish
-between the aggregation functions used for a query (e.g. `cnt`, `avg`, etc).
-
-For example, if this parameter is set to `bitmovin.`, for a `count` query run
-for the `IMPRESSION_ID` metric, the resulting metric name in New Relic would be
-`bitmovin.cnt_impression_id`.
+metric name when the metric is exported to New Relic. For more information
+on metric naming see the [query name](#query-name) paremeter.
 
 ###### `bitmovinApiKey`
 
@@ -805,7 +800,27 @@ values are supported.
 
 See the [Query Examples section](#query-examples) for example usages.
 
+###### Query `name`
+
+| Description | Valid Values | Required | Default |
+| --- | --- | --- | --- |
+| Metric name. | string | N | N/a |
+
+This parameter specifies the metric name for a given query. When present, the final metric name is generated using the
+[`metric prefix`](#bitmovinmetricprefix) plus the `name` parameter. For example, if `bitmovinMetricPrefix` is `bitmovin.`
+and `name` is `count_views`, the final metric name sent to New Relic will be `bitmovin.count_views`.
+
+Although optional, this parameter is **highly recommended**. A config file can contain multiple queries with the same `type`
+and `metric`, but different dimensions, filters, order-by, etc. Since the metric name is automatically generated only
+using the pair `type` and `metric`, this could cause the collision of multiple different Bitmovin metrics, being
+sent to New Relic with the same name. The legacy way of automatically generating metric names (described in the [next section](#bitmovin-to-new-relic-metric-mapping))
+is kept for backwards compatibility, but it's deprecated and will be eventually removed.
+
 ###### Bitmovin to New Relic metric mapping
+
+> [!WARNING]
+> This mechanism for metric naming is **deprecated**.
+> The information exposed in this section only applies if the [`name`](#query-name) parameter is not specified.
 
 Metrics returned from the Bitmovin API are all mapped to
 [New Relic gauge metrics](https://docs.newrelic.com/docs/data-apis/understand-data/metric-data/metric-data-type/)
@@ -842,6 +857,7 @@ queries:
 # ...
 - type: count
   metric: IMPRESSION_ID
+  name: count_impressions
   filters:
     VIDEO_STARTUPTIME:
       operator: GT
@@ -855,6 +871,7 @@ queries:
 # ...
 - type: count
   metric: PLAY_ATTEMPTS
+  name: count_play_attempts
 ```
 
 **[Unique Users](https://developer.bitmovin.com/playback/docs/how-to-recreate-dashboard-queries-via-the-api-1#unique-users)**
@@ -864,6 +881,7 @@ queries:
 # ...
 - type: count
   metric: USER_ID
+  name: count_users
   filters:
     VIDEO_STARTUPTIME:
       operator: GT
@@ -876,6 +894,7 @@ queries:
 queries:
 # ...
 - type: max_concurrentviewers
+  name: max_viewers
 ```
 
 **[Total Page Loads](https://developer.bitmovin.com/playback/docs/how-to-recreate-dashboard-queries-via-the-api-1#total-page-loads)**
@@ -885,6 +904,7 @@ queries:
 # ...
 - type: count
   metric: IMPRESSION_ID
+  name: count_impressions
   filters:
     PLAYER_STARTUPTIME:
       operator: GT
@@ -898,6 +918,7 @@ queries:
 # ...
 - type: sum
   metric: PLAYED
+  name: sum_played
   filters:
     PLAYED:
       operator: GT
@@ -911,6 +932,7 @@ queries:
 # ...
 - type: average
   metric: VIEWTIME
+  name: avrg_viewtime
 ```
 
 The following examples show how to recreate each of the [Quality of Experience metrics](https://developer.bitmovin.com/playback/docs/how-to-recreate-dashboard-queries-via-the-api-1#quality-of-experience)
@@ -923,6 +945,7 @@ queries:
 # ...
 - type: median
   metric: STARTUPTIME
+  name: median_startup
   filters:
     PAGE_LOAD_TYPE:
       operator: EQ
@@ -939,6 +962,7 @@ queries:
 # ...
 - type: median
   metric: PLAYER_STARTUPTIME
+name: median_player_startup
   filters:
     PAGE_LOAD_TYPE:
       operator: EQ
@@ -955,6 +979,7 @@ queries:
 # ...
 - type: median
   metric: VIDEO_STARTUPTIME
+  name: median_video_startup
   filters:
     VIDEO_STARTUPTIME:
       operator: GT
@@ -968,6 +993,7 @@ queries:
 # ...
 - type: median
   metric: SEEKED
+  name: median_seeked
   filters:
     SEEKED:
       operator: GT
@@ -981,6 +1007,7 @@ queries:
 # ...
 - type: average
   metric: ERROR_PERCENTAGE
+  name: avrg_error
 ```
 
 **[Start Failures](https://developer.bitmovin.com/playback/docs/how-to-recreate-dashboard-queries-via-the-api-1#start-failures)**
@@ -990,6 +1017,7 @@ queries:
 # ...
 - type: count
   metric: VIDEOSTART_FAILED
+  name: count_video_start_failures
   filters:
     VIDEOSTART_FAILED_REASON:
       operator: NE
@@ -1006,6 +1034,7 @@ queries:
 # ...
 - type: average
   metric: REBUFFER_PERCENTAGE
+  name: avrg_rebuffer
 ```
 
 **[Buffering Time](https://developer.bitmovin.com/playback/docs/how-to-recreate-dashboard-queries-via-the-api-1#buffering-time)**
@@ -1015,6 +1044,7 @@ queries:
 # ...
 - type: average
   metric: BUFFERED
+  name: avrg_buffered
 ```
 
 **[Data Downloaded](https://developer.bitmovin.com/playback/docs/how-to-recreate-dashboard-queries-via-the-api-1#data-downloaded)**
@@ -1024,6 +1054,7 @@ queries:
 # ...
 - type: sum
   metric: VIDEO_SEGMENTS_DOWNLOAD_SIZE
+  name: sum_video_segments_size
 ```
 
 **[Bandwidth](https://developer.bitmovin.com/playback/docs/how-to-recreate-dashboard-queries-via-the-api-1#bandwidth)**
@@ -1033,6 +1064,7 @@ queries:
 # ...
 - type: average
   metric: DOWNLOAD_SPEED
+  name: avrg_speed
 ```
 
 **[Video Bitrate](https://developer.bitmovin.com/playback/docs/how-to-recreate-dashboard-queries-via-the-api-1#video-bitrate)**
@@ -1042,6 +1074,7 @@ queries:
 # ...
 - type: average
   metric: VIDEO_BITRATE
+  name: avrg_bitrate
   filters:
     VIDEO_BITRATE:
       operator: GT
@@ -1055,6 +1088,7 @@ queries:
 # ...
 - type: average
   metric: SCALE_FACTOR
+  name: avrg_scale
 ```
 
 ## Building

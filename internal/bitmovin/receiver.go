@@ -18,17 +18,15 @@ import (
 
 const (
 	DEFAULT_NULL_VALUE_STRING = "<NULL>"
-	BaseURL = "https://api.bitmovin.com"
+	BaseURL                   = "https://api.bitmovin.com"
 )
 
 type BitmovinAuthenticator struct {
-	credentials 		*BitmovinCredentials
+	credentials *BitmovinCredentials
 }
 
-func NewBitmovinAuthenticator(credentials *BitmovinCredentials) (
-	*BitmovinAuthenticator,
-) {
-	return &BitmovinAuthenticator{ credentials }
+func NewBitmovinAuthenticator(credentials *BitmovinCredentials) *BitmovinAuthenticator {
+	return &BitmovinAuthenticator{credentials}
 }
 
 func (b *BitmovinAuthenticator) Authenticate(
@@ -48,7 +46,7 @@ func bitmovinPostBodyBuilder(
 	queryParams *BitmovinQueryParams,
 	recvInterval time.Duration,
 ) connectors.HttpBodyBuilder {
-	return func () (any, error) {
+	return func() (any, error) {
 		end := time.Now().UTC()
 		bufferDuration := time.Duration(recvInterval + 60)
 		start := end.Add(-bufferDuration * time.Second)
@@ -102,13 +100,11 @@ func bitmovinPostBodyBuilder(
 func bitmovinResponseDecoderBuilder(
 	queryParams *BitmovinQueryParams,
 	metricPrefix string,
-) (
-	pipeline.MetricsDecoderFunc,
-) {
+) pipeline.MetricsDecoderFunc {
 	return func(
 		receiver pipeline.MetricsReceiver,
 		in io.ReadCloser,
-		out chan <- model.Metric,
+		out chan<- model.Metric,
 	) error {
 		apiResponse := BitmovinResponse{}
 
@@ -136,7 +132,7 @@ func bitmovinResponseDecoderBuilder(
 		}
 
 		// Generate the metrics
-		LOOP:
+	LOOP:
 
 		for i := 0; i < len(apiResponse.Data.Result.Rows); i += 1 {
 			colCount := len(apiResponse.Data.Result.Rows[i])
@@ -219,14 +215,22 @@ func bitmovinResponseDecoderBuilder(
 				continue
 			}
 
+			var metricName string
+
+			if queryParams.Name == "" {
+				metricName = fmt.Sprintf("%s%s", metricPrefix, queryParams.NRMetric)
+			} else {
+				metricName = fmt.Sprintf("%s%s", metricPrefix, queryParams.Name)
+			}
+
 			metric := model.NewGaugeMetric(
-				fmt.Sprintf("%s%s", metricPrefix, queryParams.NRMetric),
+				metricName,
 				model.MakeNumeric(val),
 				time.Unix(int64(timestamp/1000), 0),
 			)
 
 			if len(dimensions) > 0 {
-				for k, v := range(dimensions) {
+				for k, v := range dimensions {
 					metric.Attributes[k] = v
 				}
 			}
@@ -254,7 +258,7 @@ func addReceiver(
 	mp.AddReceiver(
 		pipeline.NewSimpleReceiver(
 			id,
-			BaseURL + queryParams.URI,
+			BaseURL+queryParams.URI,
 			pipeline.WithAuthenticator(authenticator),
 			pipeline.WithMethod("POST"),
 			pipeline.WithBody(bitmovinPostBodyBuilder(
@@ -266,7 +270,7 @@ func addReceiver(
 				queryParams,
 				metricPrefix,
 			)),
-			pipeline.WithTimeout(time.Duration(timeout) * time.Second),
+			pipeline.WithTimeout(time.Duration(timeout)*time.Second),
 		),
 	)
 }
@@ -279,10 +283,10 @@ func buildFilters(query *BitmovinQuery) []map[string]any {
 	}
 
 	for k, v := range *query.Filters {
-		filters = append(filters, map[string]any {
-			"name": strings.ToUpper(k),
+		filters = append(filters, map[string]any{
+			"name":     strings.ToUpper(k),
 			"operator": strings.ToUpper(v.Operator),
-			"value": v.Value,
+			"value":    v.Value,
 		})
 	}
 
@@ -323,145 +327,162 @@ func addReceiverWithQuery(
 	licenseKey string,
 	metricPrefix string,
 	recvInterval time.Duration,
+	queryPos int,
 	query *BitmovinQuery,
 ) error {
 	var queryParams *BitmovinQueryParams
 
+	if query.Name == "" {
+		log.Warnf("automatic metric names are DEPRECATED, add a 'name' parameter to your config file for the query at position %d", queryPos+1)
+	}
+
 	switch query.Type {
 	case "max_concurrentviewers":
 		queryParams = &BitmovinQueryParams{
-			URI:         	"/v1/analytics/metrics/max_concurrentviewers",
-			NRMetric:    	"max_concurrent_viewers",
-			Metric:		 	"max_concurrentviewers",
-			BMDimension: 	"",
-			Filters:     	buildFilters(query),
-			GroupBy:	 	buildGroupBy(query),
-			Interval:    	getInterval(query),
-			OrderBy:     	buildOrderBy(query),
+			Name:        query.Name,
+			URI:         "/v1/analytics/metrics/max_concurrentviewers",
+			NRMetric:    "max_concurrent_viewers",
+			Metric:      "max_concurrentviewers",
+			BMDimension: "",
+			Filters:     buildFilters(query),
+			GroupBy:     buildGroupBy(query),
+			Interval:    getInterval(query),
+			OrderBy:     buildOrderBy(query),
 		}
 	case "avg_concurrentviewers":
 		queryParams = &BitmovinQueryParams{
-			URI:         	"/v1/analytics/metrics/avg_concurrentviewers",
-			NRMetric:    	"avg_concurrent_viewers",
-			Metric:		 	"avg_concurrentviewers",
-			BMDimension: 	"",
-			Filters:     	buildFilters(query),
-			GroupBy:	 	buildGroupBy(query),
-			Interval:    	getInterval(query),
-			OrderBy:     	buildOrderBy(query),
+			Name:        query.Name,
+			URI:         "/v1/analytics/metrics/avg_concurrentviewers",
+			NRMetric:    "avg_concurrent_viewers",
+			Metric:      "avg_concurrentviewers",
+			BMDimension: "",
+			Filters:     buildFilters(query),
+			GroupBy:     buildGroupBy(query),
+			Interval:    getInterval(query),
+			OrderBy:     buildOrderBy(query),
 		}
 	case "avg_dropped_frames":
 		queryParams = &BitmovinQueryParams{
-			URI:         	"/v1/analytics/metrics/avg_dropped_frames",
-			NRMetric:    	"avg_dropped_frames",
-			Metric:		 	"avg_dropped_frames",
-			BMDimension: 	"",
-			Filters:     	buildFilters(query),
-			GroupBy:	 	buildGroupBy(query),
-			Interval:    	getInterval(query),
-			OrderBy:     	buildOrderBy(query),
+			Name:        query.Name,
+			URI:         "/v1/analytics/metrics/avg_dropped_frames",
+			NRMetric:    "avg_dropped_frames",
+			Metric:      "avg_dropped_frames",
+			BMDimension: "",
+			Filters:     buildFilters(query),
+			GroupBy:     buildGroupBy(query),
+			Interval:    getInterval(query),
+			OrderBy:     buildOrderBy(query),
 		}
 	case "count":
 		queryParams = &BitmovinQueryParams{
-			URI:         	"/v1/analytics/queries/count",
-			NRMetric:    	fmt.Sprintf("cnt_%s", strings.ToLower(query.Metric)),
-			Metric:			"",
-			BMDimension: 	query.Metric,
-			Filters:     	buildFilters(query),
-			GroupBy:	 	buildGroupBy(query),
-			Interval:    	getInterval(query),
-			OrderBy:     	buildOrderBy(query),
+			Name:        query.Name,
+			URI:         "/v1/analytics/queries/count",
+			NRMetric:    fmt.Sprintf("cnt_%s", strings.ToLower(query.Metric)),
+			Metric:      "",
+			BMDimension: query.Metric,
+			Filters:     buildFilters(query),
+			GroupBy:     buildGroupBy(query),
+			Interval:    getInterval(query),
+			OrderBy:     buildOrderBy(query),
 		}
 	case "sum":
 		queryParams = &BitmovinQueryParams{
-			URI:         	"/v1/analytics/queries/sum",
-			NRMetric:    	fmt.Sprintf("sum_%s", strings.ToLower(query.Metric)),
-			Metric:			"",
-			BMDimension: 	query.Metric,
-			Filters:     	buildFilters(query),
-			GroupBy:	 	buildGroupBy(query),
-			Interval:    	getInterval(query),
-			OrderBy:     	buildOrderBy(query),
+			Name:        query.Name,
+			URI:         "/v1/analytics/queries/sum",
+			NRMetric:    fmt.Sprintf("sum_%s", strings.ToLower(query.Metric)),
+			Metric:      "",
+			BMDimension: query.Metric,
+			Filters:     buildFilters(query),
+			GroupBy:     buildGroupBy(query),
+			Interval:    getInterval(query),
+			OrderBy:     buildOrderBy(query),
 		}
 	case "average":
 		queryParams = &BitmovinQueryParams{
-			URI:         	"/v1/analytics/queries/avg",
-			NRMetric:    	fmt.Sprintf("avg_%s", strings.ToLower(query.Metric)),
-			Metric:			"",
-			BMDimension: 	query.Metric,
-			Filters:     	buildFilters(query),
-			GroupBy:	 	buildGroupBy(query),
-			Interval:    	getInterval(query),
-			OrderBy:     	buildOrderBy(query),
+			Name:        query.Name,
+			URI:         "/v1/analytics/queries/avg",
+			NRMetric:    fmt.Sprintf("avg_%s", strings.ToLower(query.Metric)),
+			Metric:      "",
+			BMDimension: query.Metric,
+			Filters:     buildFilters(query),
+			GroupBy:     buildGroupBy(query),
+			Interval:    getInterval(query),
+			OrderBy:     buildOrderBy(query),
 		}
 	case "min":
 		queryParams = &BitmovinQueryParams{
-			URI:         	"/v1/analytics/queries/min",
-			NRMetric:    	fmt.Sprintf("min_%s", strings.ToLower(query.Metric)),
-			Metric:			"",
-			BMDimension: 	query.Metric,
-			Filters:     	buildFilters(query),
-			GroupBy:	 	buildGroupBy(query),
-			Interval:    	getInterval(query),
-			OrderBy:     	buildOrderBy(query),
+			Name:        query.Name,
+			URI:         "/v1/analytics/queries/min",
+			NRMetric:    fmt.Sprintf("min_%s", strings.ToLower(query.Metric)),
+			Metric:      "",
+			BMDimension: query.Metric,
+			Filters:     buildFilters(query),
+			GroupBy:     buildGroupBy(query),
+			Interval:    getInterval(query),
+			OrderBy:     buildOrderBy(query),
 		}
 	case "max":
 		queryParams = &BitmovinQueryParams{
-			URI:         	"/v1/analytics/queries/max",
-			NRMetric:    	fmt.Sprintf("max_%s", strings.ToLower(query.Metric)),
-			Metric:			"",
-			BMDimension: 	query.Metric,
-			Filters:     	buildFilters(query),
-			GroupBy:	 	buildGroupBy(query),
-			Interval:    	getInterval(query),
-			OrderBy:     	buildOrderBy(query),
+			Name:        query.Name,
+			URI:         "/v1/analytics/queries/max",
+			NRMetric:    fmt.Sprintf("max_%s", strings.ToLower(query.Metric)),
+			Metric:      "",
+			BMDimension: query.Metric,
+			Filters:     buildFilters(query),
+			GroupBy:     buildGroupBy(query),
+			Interval:    getInterval(query),
+			OrderBy:     buildOrderBy(query),
 		}
 	case "stddev":
 		queryParams = &BitmovinQueryParams{
-			URI:         	"/v1/analytics/queries/stddev",
-			NRMetric:    	fmt.Sprintf("stddev_%s", strings.ToLower(query.Metric)),
-			Metric:			"",
-			BMDimension: 	query.Metric,
-			Filters:     	buildFilters(query),
-			GroupBy:	 	buildGroupBy(query),
-			Interval:    	getInterval(query),
-			OrderBy:     	buildOrderBy(query),
+			Name:        query.Name,
+			URI:         "/v1/analytics/queries/stddev",
+			NRMetric:    fmt.Sprintf("stddev_%s", strings.ToLower(query.Metric)),
+			Metric:      "",
+			BMDimension: query.Metric,
+			Filters:     buildFilters(query),
+			GroupBy:     buildGroupBy(query),
+			Interval:    getInterval(query),
+			OrderBy:     buildOrderBy(query),
 		}
 	case "percentile":
 		// @TODO: add percentile
 		queryParams = &BitmovinQueryParams{
-			URI:         	"/v1/analytics/queries/percentile",
-			NRMetric:    	fmt.Sprintf("p%d_%s", *query.Percentile, strings.ToLower(query.Metric)),
-			Metric:			"",
-			BMDimension: 	query.Metric,
-			Filters:     	buildFilters(query),
-			GroupBy:	 	buildGroupBy(query),
-			Interval:    	getInterval(query),
-			OrderBy:     	buildOrderBy(query),
-			Percentile:		query.Percentile,
+			Name:        query.Name,
+			URI:         "/v1/analytics/queries/percentile",
+			NRMetric:    fmt.Sprintf("p%d_%s", *query.Percentile, strings.ToLower(query.Metric)),
+			Metric:      "",
+			BMDimension: query.Metric,
+			Filters:     buildFilters(query),
+			GroupBy:     buildGroupBy(query),
+			Interval:    getInterval(query),
+			OrderBy:     buildOrderBy(query),
+			Percentile:  query.Percentile,
 		}
 	case "variance":
 		// @TODO: add percentile
 		queryParams = &BitmovinQueryParams{
-			URI:         	"/v1/analytics/queries/variance",
-			NRMetric:    	fmt.Sprintf("var_%s", strings.ToLower(query.Metric)),
-			Metric:			"",
-			BMDimension: 	query.Metric,
-			Filters:     	buildFilters(query),
-			GroupBy:	 	buildGroupBy(query),
-			Interval:    	getInterval(query),
-			OrderBy:     	buildOrderBy(query),
+			Name:        query.Name,
+			URI:         "/v1/analytics/queries/variance",
+			NRMetric:    fmt.Sprintf("var_%s", strings.ToLower(query.Metric)),
+			Metric:      "",
+			BMDimension: query.Metric,
+			Filters:     buildFilters(query),
+			GroupBy:     buildGroupBy(query),
+			Interval:    getInterval(query),
+			OrderBy:     buildOrderBy(query),
 		}
 	case "median":
 		queryParams = &BitmovinQueryParams{
-			URI:         	"/v1/analytics/queries/median",
-			NRMetric:    	fmt.Sprintf("med_%s", strings.ToLower(query.Metric)),
-			Metric:			"",
-			BMDimension: 	query.Metric,
-			Filters:     	buildFilters(query),
-			GroupBy:	 	buildGroupBy(query),
-			Interval:    	getInterval(query),
-			OrderBy:     	buildOrderBy(query),
+			Name:        query.Name,
+			URI:         "/v1/analytics/queries/median",
+			NRMetric:    fmt.Sprintf("med_%s", strings.ToLower(query.Metric)),
+			Metric:      "",
+			BMDimension: query.Metric,
+			Filters:     buildFilters(query),
+			GroupBy:     buildGroupBy(query),
+			Interval:    getInterval(query),
+			OrderBy:     buildOrderBy(query),
 		}
 	}
 
@@ -487,14 +508,15 @@ func setupReceivers(
 	metricPrefix := viper.GetString("bitmovinMetricPrefix")
 	authenticator := NewBitmovinAuthenticator(credentials)
 
-	for _, query := range queries {
+	for pos := range queries {
 		err := addReceiverWithQuery(
 			mp,
 			authenticator,
 			credentials.licenseKey,
 			metricPrefix,
 			recvInterval,
-			&query,
+			pos,
+			&queries[pos],
 		)
 		if err != nil {
 			return err
