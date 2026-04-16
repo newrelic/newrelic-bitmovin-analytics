@@ -417,18 +417,6 @@ environment variable.
 This parameter specifies which New Relic region that generated metrics should be
 sent to.
 
-###### `interval`
-
-| Description | Valid Values | Required | Default |
-| --- | --- | --- | --- |
-| Polling interval (in _seconds_) | numeric | N | 60 |
-
-This parameter has a dual-purpose, when [`runAsService`](#runasservice) is set
-to `true`, it specifies the interval (in _seconds_) at which the integration
-should poll the Bitmovin Analytics API for metrics. And it is also used
-to calculate the start/end time interval for the queries sent to the Bitmovin
-API, where the end is always now, and the start is now minus `interval`.
-
 ###### `runAsService`
 
 | Description | Valid Values | Required | Default |
@@ -445,6 +433,22 @@ error or panic occurs.
 
 When set to `false`, the integration will run once and exit. This is intended for
 use with an external scheduling mechanism like [cron](https://man7.org/linux/man-pages/man8/cron.8.html).
+
+###### `interval`
+
+| Description | Valid Values | Required | Default |
+| --- | --- | --- | --- |
+| Polling interval (in _seconds_) | numeric | N | 60 |
+
+This parameter has a dual-purpose, it's used to calculate the start/end time
+interval for the queries sent to the Bitmovin API, where the end is always now,
+and the start is now minus `interval`. And when [`runAsService`](#runasservice)
+is set to `true`, it also specifies the interval (in _seconds_) at which the
+integration should poll the Bitmovin Analytics API for metrics.
+
+When running the integration in cron mode (`runAsService` set to `false`), make
+sure to match the cron trigger times with the value of `interval`, otherwise
+data duplication or data gaps could happen.
 
 ###### `pipeline`
 

@@ -149,17 +149,11 @@ func getBitmovinTimeout() uint {
 	return timeout
 }
 
-func calcQueryStartEnd(recvInterval time.Duration) (string, string) {
-	end := time.Now().UTC()
-	bufferDuration := time.Duration(recvInterval + 60)
-	start := end.Add(-bufferDuration * time.Second)
-	return start.Format(time.RFC3339Nano), end.Format(time.RFC3339Nano)
-}
-
 func buildQuery(
 	queryPos int,
 	query *BitmovinQuery,
-	recvInterval time.Duration,
+	startTime string,
+	endTime string,
 ) *BitmovinQueryParams {
 	var queryParams *BitmovinQueryParams
 
@@ -265,7 +259,8 @@ func buildQuery(
 	queryParams.OrderBy = buildOrderBy(query)
 	queryParams.Limit = RESULT_LIMIT
 	queryParams.Offset = 0
-	queryParams.StartTime, queryParams.EndTime = calcQueryStartEnd(recvInterval)
+	queryParams.StartTime = startTime
+	queryParams.EndTime = endTime
 
 	return queryParams
 }
@@ -450,6 +445,13 @@ func NewBitmovinReceiver(
 	}
 }
 
+func calcQueryStartEnd(recvInterval time.Duration) (string, string) {
+	end := time.Now().UTC()
+	bufferDuration := time.Duration(recvInterval + 60)
+	start := end.Add(-bufferDuration * time.Second)
+	return start.Format(time.RFC3339Nano), end.Format(time.RFC3339Nano)
+}
+
 //// MetricsReceiver interface implementation \\\\
 
 func (r *BitmovinMetricReceiver) GetId() string {
@@ -463,11 +465,12 @@ func (r *BitmovinMetricReceiver) PollMetrics(
 
 	metricPrefix := viper.GetString("bitmovinMetricPrefix")
 	authenticator := NewBitmovinAuthenticator(r.credentials)
+	startTime, endTime := calcQueryStartEnd(r.recvInterval)
 
 	for queryIndex := range r.queries {
 		log.Debugf("Request query at index %d", queryIndex)
 
-		queryParams := buildQuery(queryIndex, &r.queries[queryIndex], r.recvInterval)
+		queryParams := buildQuery(queryIndex, &r.queries[queryIndex], startTime, endTime)
 		lastPage := false
 
 		for !lastPage {
