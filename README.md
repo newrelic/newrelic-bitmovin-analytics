@@ -423,11 +423,11 @@ sent to.
 | --- | --- | --- | --- |
 | Polling interval (in _seconds_) | numeric | N | 60 |
 
-This parameter specifies the interval (in _seconds_) at which the integration
-should poll the Bitmovin Analytics API for metrics.
-
-This parameter is only used when [`runAsService`](#runasservice) is set to
-`true`.
+This parameter has a dual-purpose, when [`runAsService`](#runasservice) is set
+to `true`, it specifies the interval (in _seconds_) at which the integration
+should poll the Bitmovin Analytics API for metrics. And it is also used
+to calculate the start/end time interval for the queries sent to the Bitmovin
+API, where the end is always now, and the start is now minus `interval`.
 
 ###### `runAsService`
 
