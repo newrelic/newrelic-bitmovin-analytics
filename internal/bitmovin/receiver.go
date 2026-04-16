@@ -503,7 +503,7 @@ func (r *BitmovinMetricReceiver) PollMetrics(
 				lastPage = true
 			} else {
 				// Something went really wrong
-				return fmt.Errorf("We have more results than the expected, data might be inconsistent or corrupted")
+				return fmt.Errorf("we have more results than the expected, data might be inconsistent or corrupted")
 			}
 		}
 	}
