@@ -54,5 +54,5 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-// @TODO: remove after development
+// @todo: remove after development
 //replace github.com/newrelic/newrelic-labs-sdk v1.5.0 => ../newrelic-labs-sdk

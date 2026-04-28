@@ -226,7 +226,6 @@ func buildQuery(
 			BMDimension: query.Metric,
 		}
 	case "percentile":
-		// @TODO: add percentile
 		queryParams = &BitmovinQueryParams{
 			URI:         "/v1/analytics/queries/percentile",
 			NRMetric:    fmt.Sprintf("p%d_%s", *query.Percentile, strings.ToLower(query.Metric)),
@@ -235,7 +234,6 @@ func buildQuery(
 			Percentile:  query.Percentile,
 		}
 	case "variance":
-		// @TODO: add percentile
 		queryParams = &BitmovinQueryParams{
 			URI:         "/v1/analytics/queries/variance",
 			NRMetric:    fmt.Sprintf("var_%s", strings.ToLower(query.Metric)),
@@ -282,7 +280,7 @@ func newQueryConnector(
 	return connector
 }
 
-// TODO: refactor this function, it's a bit spaghetti
+// @todo: refactor this function, it's a bit spaghetti
 func decodeAndSendResponse(
 	queryParams *BitmovinQueryParams,
 	metricPrefix string,
