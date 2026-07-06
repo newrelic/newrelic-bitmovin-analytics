@@ -68,104 +68,10 @@ steps.
 A Docker image for the Bitmovin Analytics integration is available at
 [https://hub.docker.com/r/newrelic/newrelic-bitmovin-analytics](https://hub.docker.com/r/newrelic/newrelic-bitmovin-analytics).
 This image can be used to run the integration inside a Docker container
-[directly](#run-directly-from-dockerhub), as a base image for
+directly as a base image for
 [building a custom image](#extend-the-base-image), or using
-[the provided `Dockerfile`](./build/package/Dockerfile) to
+[the provided `Dockerfile`](./docker/Dockerfile) to
 [build a custom image](#build-a-custom-image).
-
-#### Run directly from [DockerHub](https://hub.docker.com/)
-
-The Bitmovin Analytics integration [Docker image](https://hub.docker.com/r/newrelic/newrelic-bitmovin-analytics)
-can be run directly from [DockerHub](https://hub.docker.com/). In this scenario,
-the integration will use the [standard configuration](./configs/standard-config.yml).
-The `NEW_RELIC_LICENSE_KEY` and the Bitmovin credentials _must_ be specified
-using environment variables.
-
-To use a custom configuration, the [`config.yml`](#configyml) must be mapped
-into the running container. It can be mapped using the default filename or using
-a custom filename. In the case of the latter, the `--config_path` [command line option](#command-line-options)
-must be specified with the custom filename. The `NEW_RELIC_LICENSE_KEY` and the
-Bitmovin credentials can be specifed in the [`config.yml`](#configyml) or using
-environment variables.
-
-In both case, additional environment variables can be passed to the container
-using `docker run` with the [`-e`, `--env`, or `--env-file` options](https://docs.docker.com/reference/cli/docker/container/run/#env)
-for [configuration parameters](#configuration) that can be specified via
-environment variables. See below for examples.
-
-**Example 1: Using the standard configuration**
-
-In the following example, the integration is run inside a Docker container using
-the standard configuration. The New Relic License Key and Bitmovin credentials
-are specified using environment variables. No command line argument are passed
-to the integration.
-
-```bash
-docker run -t --rm --name new-relic-bitmovin \
-   -e NEW_RELIC_LICENSE_KEY=$NEW_RELIC_LICENSE_KEY \
-   -e BITMOVINAPIKEY=$BITMOVINAPIKEY \
-   -e BITMOVINLICENSEKEY=$BITMOVINLICENSEKEY \
-   -e BITMOVINTENANTORG=$BITMOVINTENANTORG \
-   newrelic/newrelic-bitmovin-analytics
-```
-
-**Example 2: Using a custom configuration with the default filename**
-
-In the following example, the file `config.yml` in the current directory on the
-host system is mapped to the default location in the container
-(`configs/config.yml`). As in the previous example, the New Relic License Key
-and Bitmovin credentials are specified using environment variables. No command
-line argument are passed to the integration.
-
-```bash
-docker run -t --rm --name new-relic-bitmovin \
-   -v "$PWD/config.yml":/usr/src/app/configs/config.yml \
-   -e NEW_RELIC_LICENSE_KEY=$NEW_RELIC_LICENSE_KEY \
-   -e BITMOVINAPIKEY=$BITMOVINAPIKEY \
-   -e BITMOVINLICENSEKEY=$BITMOVINLICENSEKEY \
-   -e BITMOVINTENANTORG=$BITMOVINTENANTORG \
-   newrelic/newrelic-bitmovin-analytics
-```
-
-**Example 3: Using a custom configuration with a custom filename**
-
-In the following example, the file `config.yml` in the current directory on the
-host system is mapped to the location `configs/my_custom_config.yml` in the
-container and the `-f` [command line option](#command-line-options) is used to
-specify the custom filename. The full path is not needed as `/usr/src/app` is
-the working directory when the integration runs in the container. As in the
-previous example, the New Relic License Key and Bitmovin credentials are
-specified using environment variables.
-
-```bash
-docker run -t --rm --name newrelic-bitmovin \
-   -v "$PWD/config.yml":/usr/src/app/configs/my_custom_config.yml \
-   -e NEW_RELIC_LICENSE_KEY=$NEW_RELIC_LICENSE_KEY \
-   -e BITMOVINAPIKEY=$BITMOVINAPIKEY \
-   -e BITMOVINLICENSEKEY=$BITMOVINLICENSEKEY \
-   -e BITMOVINTENANTORG=$BITMOVINTENANTORG \
-   newrelic/newrelic-bitmovin-analytics \
-   --config_path configs/my_custom_config.yml
-```
-
-**Example 4: Using additional environment variables**
-
-In the following example, additional environment variables are passed to the
-container to configure the integration. In this case, the Bitmovin metric prefix
-is specified using the [`BITMOVINMETRICPREFIX`](#bitmovinmetricprefix) environment
-variable and the [`RUNASSERVICE`](#runasservice) environment variable is
-specified to configure the integration to run as a standalone service.
-
-```bash
-docker run -t --rm --name newrelic-bitmovin \
-   -e NEW_RELIC_LICENSE_KEY=$NEW_RELIC_LICENSE_KEY \
-   -e BITMOVINAPIKEY=$BITMOVINAPIKEY \
-   -e BITMOVINLICENSEKEY=$BITMOVINLICENSEKEY \
-   -e BITMOVINTENANTORG=$BITMOVINTENANTORG \
-   -e BITMOVINMETRICPREFIX=my.bitmovin. \
-   -e RUNASSERVICE=true \
-   newrelic/newrelic-bitmovin-analytics
-```
 
 #### Extend the base image
 
