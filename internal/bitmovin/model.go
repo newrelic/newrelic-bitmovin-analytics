@@ -17,6 +17,10 @@ type BitmovinQueryParams struct {
 	OrderBy     []BitmovinOrderBy
 	Interval    string
 	Percentile  *int64
+	Limit       uint
+	Offset      uint
+	StartTime   string
+	EndTime     string
 }
 
 type BitmovinColumn struct {
@@ -69,6 +73,8 @@ type BitmovinRequestBody struct {
 	OrderBy    *[]BitmovinOrderBy `json:"orderBy,omitempty"`
 	Interval   *string            `json:"interval,omitempty"`
 	Percentile *int64             `json:"percentile,omitempty"`
+	Limit      uint               `json:"limit"`
+	Offset     uint               `json:"offset"`
 }
 
 type BitmovinFilter struct {

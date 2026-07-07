@@ -1,0 +1,3 @@
+FROM newrelic/newrelic-bitmovin-analytics
+
+COPY config.yml .

@@ -68,104 +68,10 @@ steps.
 A Docker image for the Bitmovin Analytics integration is available at
 [https://hub.docker.com/r/newrelic/newrelic-bitmovin-analytics](https://hub.docker.com/r/newrelic/newrelic-bitmovin-analytics).
 This image can be used to run the integration inside a Docker container
-[directly](#run-directly-from-dockerhub), as a base image for
+directly as a base image for
 [building a custom image](#extend-the-base-image), or using
-[the provided `Dockerfile`](./build/package/Dockerfile) to
+[the provided `Dockerfile`](./docker/Dockerfile) to
 [build a custom image](#build-a-custom-image).
-
-#### Run directly from [DockerHub](https://hub.docker.com/)
-
-The Bitmovin Analytics integration [Docker image](https://hub.docker.com/r/newrelic/newrelic-bitmovin-analytics)
-can be run directly from [DockerHub](https://hub.docker.com/). In this scenario,
-the integration will use the [standard configuration](./configs/standard-config.yml).
-The `NEW_RELIC_LICENSE_KEY` and the Bitmovin credentials _must_ be specified
-using environment variables.
-
-To use a custom configuration, the [`config.yml`](#configyml) must be mapped
-into the running container. It can be mapped using the default filename or using
-a custom filename. In the case of the latter, the `--config_path` [command line option](#command-line-options)
-must be specified with the custom filename. The `NEW_RELIC_LICENSE_KEY` and the
-Bitmovin credentials can be specifed in the [`config.yml`](#configyml) or using
-environment variables.
-
-In both case, additional environment variables can be passed to the container
-using `docker run` with the [`-e`, `--env`, or `--env-file` options](https://docs.docker.com/reference/cli/docker/container/run/#env)
-for [configuration parameters](#configuration) that can be specified via
-environment variables. See below for examples.
-
-**Example 1: Using the standard configuration**
-
-In the following example, the integration is run inside a Docker container using
-the standard configuration. The New Relic License Key and Bitmovin credentials
-are specified using environment variables. No command line argument are passed
-to the integration.
-
-```bash
-docker run -t --rm --name new-relic-bitmovin \
-   -e NEW_RELIC_LICENSE_KEY=$NEW_RELIC_LICENSE_KEY \
-   -e BITMOVINAPIKEY=$BITMOVINAPIKEY \
-   -e BITMOVINLICENSEKEY=$BITMOVINLICENSEKEY \
-   -e BITMOVINTENANTORG=$BITMOVINTENANTORG \
-   newrelic/newrelic-bitmovin-analytics
-```
-
-**Example 2: Using a custom configuration with the default filename**
-
-In the following example, the file `config.yml` in the current directory on the
-host system is mapped to the default location in the container
-(`configs/config.yml`). As in the previous example, the New Relic License Key
-and Bitmovin credentials are specified using environment variables. No command
-line argument are passed to the integration.
-
-```bash
-docker run -t --rm --name new-relic-bitmovin \
-   -v "$PWD/config.yml":/usr/src/app/configs/config.yml \
-   -e NEW_RELIC_LICENSE_KEY=$NEW_RELIC_LICENSE_KEY \
-   -e BITMOVINAPIKEY=$BITMOVINAPIKEY \
-   -e BITMOVINLICENSEKEY=$BITMOVINLICENSEKEY \
-   -e BITMOVINTENANTORG=$BITMOVINTENANTORG \
-   newrelic/newrelic-bitmovin-analytics
-```
-
-**Example 3: Using a custom configuration with a custom filename**
-
-In the following example, the file `config.yml` in the current directory on the
-host system is mapped to the location `configs/my_custom_config.yml` in the
-container and the `-f` [command line option](#command-line-options) is used to
-specify the custom filename. The full path is not needed as `/usr/src/app` is
-the working directory when the integration runs in the container. As in the
-previous example, the New Relic License Key and Bitmovin credentials are
-specified using environment variables.
-
-```bash
-docker run -t --rm --name newrelic-bitmovin \
-   -v "$PWD/config.yml":/usr/src/app/configs/my_custom_config.yml \
-   -e NEW_RELIC_LICENSE_KEY=$NEW_RELIC_LICENSE_KEY \
-   -e BITMOVINAPIKEY=$BITMOVINAPIKEY \
-   -e BITMOVINLICENSEKEY=$BITMOVINLICENSEKEY \
-   -e BITMOVINTENANTORG=$BITMOVINTENANTORG \
-   newrelic/newrelic-bitmovin-analytics \
-   --config_path configs/my_custom_config.yml
-```
-
-**Example 4: Using additional environment variables**
-
-In the following example, additional environment variables are passed to the
-container to configure the integration. In this case, the Bitmovin metric prefix
-is specified using the [`BITMOVINMETRICPREFIX`](#bitmovinmetricprefix) environment
-variable and the [`RUNASSERVICE`](#runasservice) environment variable is
-specified to configure the integration to run as a standalone service.
-
-```bash
-docker run -t --rm --name newrelic-bitmovin \
-   -e NEW_RELIC_LICENSE_KEY=$NEW_RELIC_LICENSE_KEY \
-   -e BITMOVINAPIKEY=$BITMOVINAPIKEY \
-   -e BITMOVINLICENSEKEY=$BITMOVINLICENSEKEY \
-   -e BITMOVINTENANTORG=$BITMOVINTENANTORG \
-   -e BITMOVINMETRICPREFIX=my.bitmovin. \
-   -e RUNASSERVICE=true \
-   newrelic/newrelic-bitmovin-analytics
-```
 
 #### Extend the base image
 
@@ -417,18 +323,6 @@ environment variable.
 This parameter specifies which New Relic region that generated metrics should be
 sent to.
 
-###### `interval`
-
-| Description | Valid Values | Required | Default |
-| --- | --- | --- | --- |
-| Polling interval (in _seconds_) | numeric | N | 60 |
-
-This parameter specifies the interval (in _seconds_) at which the integration
-should poll the Bitmovin Analytics API for metrics.
-
-This parameter is only used when [`runAsService`](#runasservice) is set to
-`true`.
-
 ###### `runAsService`
 
 | Description | Valid Values | Required | Default |
@@ -445,6 +339,22 @@ error or panic occurs.
 
 When set to `false`, the integration will run once and exit. This is intended for
 use with an external scheduling mechanism like [cron](https://man7.org/linux/man-pages/man8/cron.8.html).
+
+###### `interval`
+
+| Description | Valid Values | Required | Default |
+| --- | --- | --- | --- |
+| Polling interval (in _seconds_) | numeric | N | 60 |
+
+This parameter has a dual-purpose, it's used to calculate the start/end time
+interval for the queries sent to the Bitmovin API, where the end is always now,
+and the start is now minus `interval`. And when [`runAsService`](#runasservice)
+is set to `true`, it also specifies the interval (in _seconds_) at which the
+integration should poll the Bitmovin Analytics API for metrics.
+
+When running the integration in cron mode (`runAsService` set to `false`), make
+sure to match the cron trigger times with the value of `interval`, otherwise
+data duplication or data gaps could happen.
 
 ###### `pipeline`
 
@@ -1101,52 +1011,6 @@ While not strictly enforced, the basic preferred editor settings are set in the
 [.editorconfig](./.editorconfig). Other than this, no style guidelines are
 currently  imposed.
 
-#### Static Analysis
-
-This project uses both [`go vet`](https://pkg.go.dev/cmd/vet) and
-[`staticcheck`](https://staticcheck.io/) to perform static code analysis. These
-checks are run via [`precommit`](https://pre-commit.com) on all commits. Though
-this can be bypassed on local commit, both tasks are also run during
-[the `validate` workflow](./.github/workflows/validate.yml) and must have no
-errors in order to be merged.
-
-#### Commit Messages
-
-Commit messages must follow [the conventional commit format](https://www.conventionalcommits.org/en/v1.0.0/).
-Again, while this can be bypassed on local commit, it is strictly enforced in
-[the `validate` workflow](./.github/workflows/validate.yml).
-
-The basic commit message structure is as follows.
-
-```
-<type>[optional scope][!]: <description>
-
-[optional body]
-
-[optional footer(s)]
-```
-
-In addition to providing consistency, the commit message is used by
-[svu](https://github.com/caarlos0/svu) during
-[the release workflow](./.github/workflows/release.yml). The presence and values
-of certain elements within the commit message affect auto-versioning. For
-example, the `feat` type will bump the minor version. Therefore, it is important
-to use the guidelines below and carefully consider the content of the commit
-message.
-
-Please use one of the types below.
-
-- `feat` (bumps minor version)
-- `fix` (bumps patch version)
-- `chore`
-- `build`
-- `docs`
-- `test`
-
-Any type can be followed by the `!` character to indicate a breaking change.
-Additionally, any commit that has the text `BREAKING CHANGE:` in the footer will
-indicate a breaking change.
-
 ### Local Development
 
 For local development, simply use `go build` and `go run`. For example,
@@ -1168,28 +1032,6 @@ the `--single-target` option to build the binary for the local `GOOS` and
 ```bash
 goreleaser build --single-target
 ```
-
-### Releases
-
-Releases are built and packaged using [`goreleaser`](https://goreleaser.com/).
-By default, a new release will be built automatically on any push to the `main`
-branch. For more details, review the [`.goreleaser.yaml`](./.goreleaser.yaml)
-and [the `goreleaser` documentation](https://goreleaser.com/intro/).
-
-The [svu](https://github.com/caarlos0/svu) utility is used to generate the next
-tag value [based on commit messages](https://github.com/caarlos0/svu#commit-messages-vs-what-they-do).
-
-### GitHub Workflows
-
-This project utilizes GitHub workflows to perform actions in response to
-certain GitHub events.
-
-| Workflow | Events | Description
-| --- | --- | --- |
-| [validate](./.github/workflows/validate.yml) | `push` | Runs [precommit](https://pre-commit.com) to perform static analysis and runs [commitlint](https://commitlint.js.org/#/) to validate the last commit message |
-| [build](./.github/workflows/build.yml) | `push`, `pull_request` | Builds and tests code |
-| [release](./.github/workflows/release.yml) | `push` to `main` branch | Generates a new tag using [svu](https://github.com/caarlos0/svu) and runs [`goreleaser`](https://goreleaser.com/) |
-| [repolinter](./.github/workflows/repolinter.yml) | `pull_request` | Enforces repository content guidelines |
 
 ## Support
 

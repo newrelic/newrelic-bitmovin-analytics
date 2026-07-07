@@ -26,6 +26,7 @@ func InitPipelines(i *integration.LabsIntegration) error {
 		return fmt.Errorf("missing bitmovin tenant org")
 	}
 
+	// Load bitmovin query config
 	var queries []BitmovinQuery
 
 	err := viper.UnmarshalKey("queries", &queries)
@@ -33,31 +34,27 @@ func InitPipelines(i *integration.LabsIntegration) error {
 		return fmt.Errorf("parse queries failed: %w", err)
 	}
 
-	bitmovinCredentials := BitmovinCredentials{
-		apiKey,
-		licenseKey,
-		tenantOrg,
-	}
+	// Create metrics pipeline
+	mp := pipeline.NewMetricsPipeline()
 
-	// Create the newrelic exporter
+	// Create newrelic exporter
 	newrelicExporter := exporters.NewNewRelicExporter(
 		"newrelic-api",
 		i,
 	)
-
-	// Create a logs pipeline
-	mp := pipeline.NewMetricsPipeline()
 	mp.AddExporter(newrelicExporter)
 
-	err = setupReceivers(
-		mp,
-		&bitmovinCredentials,
+	// Create bitmovin metric receiver
+	bitmovinMetricReceiver := NewBitmovinReceiver(
+		&BitmovinCredentials{
+			apiKey,
+			licenseKey,
+			tenantOrg,
+		},
 		i.Interval,
 		queries,
 	)
-	if err != nil {
-		return err
-	}
+	mp.AddReceiver(bitmovinMetricReceiver)
 
 	// Register the pipeline with the integration
 	i.AddPipeline(mp)
